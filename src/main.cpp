@@ -11,7 +11,7 @@ int main() {
     tset.push_back(Task(10, 5));
     tset.push_back(Task(3, 2));
     tset.push_back(Task(14, 2));
-    Scheduler* scheduler = new TEMP(true);
+    Scheduler* scheduler = new GRM(true);
     scheduler->init(tset);
     model.sim.reset(tset, scheduler, 2);
     printf("SEEKING TO 100\n");
@@ -35,7 +35,7 @@ int main() {
                 ++t;
             }
             while (t < block.end) {
-                std::cout << block.task_id;
+                std::cout << block.task_id+1;
                 ++t;
             }
         }

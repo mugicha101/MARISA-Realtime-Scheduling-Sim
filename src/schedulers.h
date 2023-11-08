@@ -12,6 +12,7 @@ struct GEDF : public Scheduler {
 // global RM
 struct GRM : public Scheduler {
     GRM(bool preemptive) : Scheduler(PriorityScheme::STATIC, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED, ScheduleEvent::JOB_RELEASE) {}
+    CoreState schedule(const JobSet& active_jobs, int cores) override;
 };
 
 // testing sheduler (schedules by job id)
