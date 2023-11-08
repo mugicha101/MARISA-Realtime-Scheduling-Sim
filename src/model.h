@@ -13,7 +13,7 @@ struct Job {
     int finishTime = -1; // time job finishes (-1 if unfinished)
     int core = -1; // core the job was last on (or currently on if running) (-1 if not executed yet)
     bool running = false; // true if the job is currently running
-    Job(int task_id, int job_id, int period = 0, int release_time = 0, int exec_time = 0, int deadline = 0) : task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
+    Job(int task_id = -1, int job_id = -1, int period = 0, int release_time = 0, int exec_time = 0, int deadline = 0) : task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
 };
 
 struct Task {

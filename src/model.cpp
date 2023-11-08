@@ -32,6 +32,23 @@ void TaskSim::sim(int endTime) {
             if (task_set[i].next_release == buffer)
                 active_jobs.push_back(task_set[i].next_job(i));
 
+        // sort jobs by executing first then preemptive then fresh
+        int next_executing = 0;
+        int next_preempted = 0;
+        int next_unexecuted = 0;
+        for (Job& job : active_jobs) {
+            if (job.running) ++next_preempted;
+            else if (job.core != -1) ++next_unexecuted;
+        }
+        next_unexecuted += next_preempted;
+        JobSet sorted_jobs(active_jobs.size());
+        for (Job& job : active_jobs) {
+            if (job.running) sorted_jobs[next_executing++] = std::move(job);
+            else if (job.core != -1) sorted_jobs[next_preempted++] = std::move(job);
+            else sorted_jobs[next_unexecuted++] = std::move(job);
+        }
+        swap(sorted_jobs, active_jobs);
+
         // schedule
         CoreState core_state = scheduler->schedule(active_jobs, cores);
         assert(core_state.size() == cores);

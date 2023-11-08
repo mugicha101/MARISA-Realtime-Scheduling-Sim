@@ -14,34 +14,20 @@ CoreState TEMP::schedule(const JobSet& active_jobs, int cores) {
 
 CoreState GRM::schedule(const JobSet& active_jobs, int cores) {
     CoreState core_state(cores, -1);
+
+    // choose jobs
     std::vector<int> chosen_jobs;
     auto cmp = [&](int i, int j) {
         return active_jobs[i].period == active_jobs[j].period ? i < j : active_jobs[i].period < active_jobs[j].period;
     };
-    auto query_heap = [&](int job_index) {
-        chosen_jobs.push_back(job_index);
+    for (int i = 0; i < active_jobs.size(); ++i) {
+        chosen_jobs.push_back(i);
         std::push_heap(chosen_jobs.begin(), chosen_jobs.end(), cmp);
         if (chosen_jobs.size() == cores + 1) {
             std::pop_heap(chosen_jobs.begin(), chosen_jobs.end(), cmp);
             chosen_jobs.pop_back();
         }
-    };
-
-    // consider executing jobs
-    for (int i = 0; i < active_jobs.size(); ++i)
-        if (active_jobs[i].running)
-            query_heap(i);
-
-    // consider preempted jobs
-    for (int i = 0; i < active_jobs.size(); ++i)
-        if (!active_jobs[i].running && active_jobs[i].core != -1)
-            query_heap(i);
-
-    // consider unexecuted jobs
-    for (int i = 0; i < active_jobs.size(); ++i)
-        if (active_jobs[i].core == -1)
-            query_heap(i);
-            
+    }  
     sort(chosen_jobs.begin(), chosen_jobs.end());
     
     // reassign chosen jobs already executing
