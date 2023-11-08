@@ -36,10 +36,13 @@ void TaskSim::sim(int endTime) {
         CoreState core_state = scheduler->schedule(active_jobs, cores);
         assert(core_state.size() == cores);
         for (int i = 0; i < active_jobs.size(); ++i)
-            active_jobs[i].core = -1;
-        for (int i = 0; i < core_state.size(); ++i)
-            if (core_state[i] != -1)
+            active_jobs[i].running = false;
+        for (int i = 0; i < core_state.size(); ++i) {
+            if (core_state[i] != -1) {
                 active_jobs[core_state[i]].core = i;
+                active_jobs[core_state[i]].running = true;
+            }
+        }
 
         // find next event
         int next_event = INT_MAX;
@@ -65,7 +68,7 @@ void TaskSim::sim(int endTime) {
         JobSet updated_active_jobs;
         for (int i = 0; i < active_jobs.size(); ++i) {
             Job& job = active_jobs[i];
-            if (job.core != -1) {
+            if (job.running) {
                 ebs.add_block(job, buffer, next_event);
                 job.exec_time -= delta_time;
             }
