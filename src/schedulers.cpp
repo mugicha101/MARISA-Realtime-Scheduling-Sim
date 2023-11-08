@@ -74,3 +74,11 @@ CoreState GEDF::schedule(const JobSet& active_jobs, int cores) {
     }));
     return core_state;
 }
+
+CoreState GFIFO::schedule(const JobSet& active_jobs, int cores) {
+    CoreState core_state(cores, -1);
+    assign_to_cores(active_jobs, core_state, choose_by_priority(active_jobs, cores, [](const Job& job) {
+        return 0;
+    }));
+    return core_state;
+}

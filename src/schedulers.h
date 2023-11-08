@@ -16,6 +16,12 @@ struct GRM : public Scheduler {
     CoreState schedule(const JobSet& active_jobs, int cores) override;
 };
 
+// global FIFO
+struct GFIFO : public Scheduler {
+    GFIFO() : Scheduler(PriorityScheme::STATIC, MigrationDegree::RESTRICTED, ScheduleEvent::JOB_RELEASE) {}
+    CoreState schedule(const JobSet& active_jobs, int cores) override;
+};
+
 // testing sheduler (schedules by job id)
 struct TEMP : public Scheduler {
     TEMP(bool preemptive) : Scheduler(PriorityScheme::STATIC, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED, ScheduleEvent::JOB_RELEASE) {}
