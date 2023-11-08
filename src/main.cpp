@@ -11,7 +11,7 @@ int main() {
     tset.push_back(Task(10, 5));
     tset.push_back(Task(3, 2));
     tset.push_back(Task(14, 2));
-    Scheduler* scheduler = new GRM(true);
+    Scheduler* scheduler = new GEDF(true);
     scheduler->init(tset);
     model.sim.reset(tset, scheduler, 2);
     printf("SEEKING TO 100\n");

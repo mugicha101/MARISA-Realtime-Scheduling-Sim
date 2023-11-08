@@ -7,6 +7,7 @@
 // global EDF
 struct GEDF : public Scheduler {
     GEDF(bool preemptive) : Scheduler(PriorityScheme::JOB_LEVEL_DYN, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED, ScheduleEvent::JOB_RELEASE) {}
+    CoreState schedule(const JobSet& active_jobs, int cores) override;
 };
 
 // global RM
