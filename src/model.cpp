@@ -1,5 +1,6 @@
 #include "model.h"
 #include <cassert>
+#include <climits>
 
 Job Task::next_job(int task_id) {
     Job job(task_id, next_job_id++, period, next_release, exec_time, next_release + relative_deadline);
