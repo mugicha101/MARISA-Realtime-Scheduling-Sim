@@ -64,15 +64,20 @@ int main() {
                         zoom_action = -1;
                     }
                     break;
+                case sf::Event::LostFocus:
                 case sf::Event::MouseLeft:
                     mouse_down = false;
+                case sf::Event::GainedFocus:
+                    mouse_lost = true;
                     break;
                 case sf::Event::MouseButtonPressed:
-                    if (event.mouseButton.button == sf::Mouse::Left) mouse_down = true;
+                    if (event.mouseButton.button == sf::Mouse::Left) {
+                        mouse_down = true;
+                        mouse_lost = true;
+                    }
                     break;
                 case sf::Event::MouseButtonReleased:
                     if (event.mouseButton.button == sf::Mouse::Left) mouse_down = false;
-                    mouse_lost = true;
                     break;
                 case sf::Event::MouseMoved:
                     mouse_moved = true;

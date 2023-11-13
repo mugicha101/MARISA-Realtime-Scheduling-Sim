@@ -56,12 +56,12 @@ struct ExecBlockView {
     ExecBlockView(const ExecBlock& block) : block(block) {}
 
     float getX() const;
-    float getY() const;
+    float getY(bool task_based) const;
     float getWidth() const;
     float getHeight() const;
-    Pos getPos() const;
+    Pos getPos(bool task_based) const;
     Pos getDim() const;
-    void draw(sf::RenderWindow& window, Transform tf) const;
+    void draw(sf::RenderWindow& window, Transform tf, bool task_based) const;
 };
 
 struct View {

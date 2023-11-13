@@ -2,6 +2,9 @@
 #include <vector>
 #include <cmath>
 
+const int BLOCK_SPACING = 10;
+const int BLOCK_HEIGHT = 5;
+
 void View::open(unsigned int width, unsigned int height) {
     window.create(sf::VideoMode(width, height), "Marisa");
 }
@@ -17,22 +20,29 @@ bool View::isOpen() {
 void View::update(Model& model) {
     window.clear(sf::Color(200, 200, 200));
     std::vector<ExecBlock> blocks = model.sim.ebs.dump();
+    Transform ltf = tf;
+
+    // render task-based view
     for (ExecBlock& block : blocks) {
         ExecBlockView view(block);
-        view.draw(window, tf);
+        view.draw(window, ltf, true);
+    }
+
+    // render core-based view
+    ltf.dy += BLOCK_SPACING * (model.sim.task_set.size() + 1);
+    for (ExecBlock& block : blocks) {
+        ExecBlockView view(block);
+        view.draw(window, ltf, false);
     }
     window.display();
 }
-
-const int BLOCK_SPACING = 10;
-const int BLOCK_HEIGHT = 5;
 
 float ExecBlockView::getX() const {
     return (float)(block.start);
 }
 
-float ExecBlockView::getY() const {
-    return (float)(block.task_id * BLOCK_SPACING + (BLOCK_SPACING - BLOCK_HEIGHT));
+float ExecBlockView::getY(bool task_based) const {
+    return (float)((task_based ? block.task_id : block.core) * BLOCK_SPACING + (BLOCK_SPACING - BLOCK_HEIGHT));
 }
 
 float ExecBlockView::getWidth() const {
@@ -43,8 +53,8 @@ float ExecBlockView::getHeight() const {
     return (float)BLOCK_HEIGHT;
 }
 
-Pos ExecBlockView::getPos() const {
-    return {getX(), getY()};
+Pos ExecBlockView::getPos(bool task_based) const {
+    return {getX(), getY(task_based)};
 }
 
 Pos ExecBlockView::getDim() const {
@@ -63,9 +73,9 @@ sf::Color hue(float v) {
     );
 };
 
-void ExecBlockView::draw(sf::RenderWindow& window, Transform tf) const {
+void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, bool task_based) const {
     sf::RectangleShape rect(*(getDim() * tf.scale));
-    rect.move(*(getPos() * tf));
-    rect.setFillColor(hue(block.job_id * 1.f / 12.f));
+    rect.move(*(getPos(task_based) * tf));
+    rect.setFillColor(hue((task_based ? block.job_id : block.task_id) / 12.f));
     window.draw(rect);
 }
