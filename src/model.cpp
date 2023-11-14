@@ -10,7 +10,7 @@ Job Task::next_job(int task_id) {
 
 void Scheduler::init(const TaskSet& task_set) {}
 
-CoreState Scheduler::schedule(const JobSet& active_jobs, int cores) {
+CoreState Scheduler::schedule(const JobSet& active_jobs, int cores, int buffer) {
     return CoreState(cores, -1);
 }
 
@@ -59,7 +59,7 @@ void TaskSim::sim(int endTime) {
         swap(sorted_jobs, active_jobs);
 
         // schedule
-        CoreState core_state = scheduler->schedule(active_jobs, cores);
+        CoreState core_state = scheduler->schedule(active_jobs, cores, buffer);
         assert(core_state.size() == cores);
         for (int i = 0; i < active_jobs.size(); ++i)
             active_jobs[i].running = false;
@@ -81,7 +81,7 @@ void TaskSim::sim(int endTime) {
                 for (Job& job : active_jobs) {
                     next_event = std::min(next_event, job.deadline);
                     if (job.core != -1)
-                        next_event = std::min(next_event, buffer + job.exec_time);
+                        next_event = std::min(next_event, buffer + job.exec_time - job.runtime);
                 }
                 break;
             case Scheduler::ScheduleEvent::QUANTUM:
@@ -96,9 +96,9 @@ void TaskSim::sim(int endTime) {
             Job& job = active_jobs[i];
             if (job.running) {
                 ebs.add_block(job, buffer, next_event);
-                job.exec_time -= delta_time;
+                job.runtime += delta_time;
             }
-            if (job.exec_time == 0)
+            if (job.runtime == job.exec_time)
                 continue;
             if (job.deadline == next_event)
                 missed = i;

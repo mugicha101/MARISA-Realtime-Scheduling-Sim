@@ -78,7 +78,7 @@ struct Scheduler {
     virtual void init(const TaskSet& task_set);
 
     // assign jobs to cores
-    virtual CoreState schedule(const JobSet& active_jobs, int cores);
+    virtual CoreState schedule(const JobSet& active_jobs, int cores, int time);
 };
 
 struct TaskSim {

@@ -5,53 +5,30 @@
 #include <cmath>
 
 const float MAX_ZOOM = 20.f;
-const float MIN_ZOOM = 0.25f;
+const float MIN_ZOOM = 0.5f;
 
 int main() {
     Model model;
-
     // setup test model
     TaskSet tset;
-    tset.push_back(Task(10, 5));
-    tset.push_back(Task(3, 2));
-    tset.push_back(Task(14, 2));
-    Scheduler* scheduler = new GEDF(true);
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(3, 1));
+    tset.push_back(Task(9, 4));
+    tset.push_back(Task(9, 4));
+    tset.push_back(Task(9, 4));
+    Scheduler* scheduler = new PD2(4);
     scheduler->init(tset);
-    model.sim.reset(tset, scheduler, 2);
-
-    /*
-    printf("SEEKING TO 100\n");
-    model.sim.seek(100);
-    printf("END (MISSED JOB: %d)\n", model.sim.missed);
-    printf("CORE VISUALIZATION:\n");
-    std::vector<ExecBlock> blocks = model.sim.ebs.dump();
-    std::sort(blocks.begin(), blocks.end(), [](ExecBlock& a, ExecBlock& b) {
-        return a.start < b.start;
-    });
-    std::vector<std::pair<int,int>> end_heap;
-    std::vector<std::vector<ExecBlock>> core_blocks(model.sim.cores);
-    for (ExecBlock& block : blocks)
-        core_blocks[block.core].push_back(block);
-    for (int c = 0; c < model.sim.cores; ++c) {
-        std::cout << c+1 << ": ";
-        int t = 0;
-        for (ExecBlock& block : core_blocks[c]) {
-            while (t < block.start) {
-                std::cout << " ";
-                ++t;
-            }
-            while (t < block.end) {
-                std::cout << block.task_id+1;
-                ++t;
-            }
-        }
-        std::cout << std::endl;
-    }
-    */
+    model.sim.reset(tset, scheduler, 4);
 
     View view;
-    const float initScale = 0.8f;
-    view.open(sf::VideoMode::getDesktopMode().width * initScale, sf::VideoMode::getDesktopMode().height * initScale);
+    const float init_scale = 0.8f;
+    view.open(sf::VideoMode::getDesktopMode().width * init_scale, sf::VideoMode::getDesktopMode().height * init_scale);
     bool mouse_down = false;
     Pos mpos;
     bool mouse_lost = true;
