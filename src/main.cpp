@@ -2,6 +2,10 @@
 #include "view.h"
 #include "schedulers.h"
 #include <iostream>
+#include <cmath>
+
+const float MAX_ZOOM = 20.f;
+const float MIN_ZOOM = 0.25f;
 
 int main() {
     Model model;
@@ -11,9 +15,11 @@ int main() {
     tset.push_back(Task(10, 5));
     tset.push_back(Task(3, 2));
     tset.push_back(Task(14, 2));
-    Scheduler* scheduler = new GFIFO();
+    Scheduler* scheduler = new GEDF(true);
     scheduler->init(tset);
     model.sim.reset(tset, scheduler, 2);
+
+    /*
     printf("SEEKING TO 100\n");
     model.sim.seek(100);
     printf("END (MISSED JOB: %d)\n", model.sim.missed);
@@ -41,6 +47,7 @@ int main() {
         }
         std::cout << std::endl;
     }
+    */
 
     View view;
     const float initScale = 0.8f;
@@ -52,6 +59,8 @@ int main() {
         Pos nmpos = mpos;
         bool mouse_moved = false;
         int zoom_action = 0.f;
+
+        // input step - handle events
         for (auto event = sf::Event{}; view.window.pollEvent(event);) {
             switch (event.type) {
                 case sf::Event::Closed:
@@ -86,6 +95,8 @@ int main() {
                     break;
             }
         }
+
+        // handle mouse actions
         if (mouse_moved) {
             if (mouse_lost) {
                 mouse_lost = false;
@@ -100,12 +111,20 @@ int main() {
         }
         if (zoom_action) {
             float zoom_factor = zoom_action == 1 ? 1.25f : 0.8f;
-            Pos offset(view.tf.dx, view.tf.dy);
-            offset = offset + mpos / (view.tf.scale * zoom_factor) - mpos / view.tf.scale;
-            view.tf.dx = offset.x;
-            view.tf.dy = offset.y;
-            view.tf.scale *= zoom_factor;
+            if (view.tf.scale * zoom_factor <= MAX_ZOOM && view.tf.scale * zoom_factor >= MIN_ZOOM) {
+                Pos offset(view.tf.dx, view.tf.dy);
+                offset = offset + mpos / (view.tf.scale * zoom_factor) - mpos / view.tf.scale;
+                view.tf.dx = offset.x;
+                view.tf.dy = offset.y;
+                view.tf.scale *= zoom_factor;
+            }
         }
+
+        // calc step - update model
+        int end_time = (int)std::ceil((Pos(view.window.getSize()) / view.tf).x);
+        model.sim.sim(end_time);
+
+        // draw step - update view
         view.update(model);
     }
 }

@@ -15,15 +15,23 @@ CoreState Scheduler::schedule(const JobSet& active_jobs, int cores) {
 }
 
 void ExecBlockStorage::add_block(const Job& job, int start, int end) {
-    exec_blocks.emplace_back(job.task_id, job.job_id, job.core, start, end);
+    new_blocks.emplace_back(job.task_id, job.job_id, job.core, start, end);
 }
 
 void ExecBlockStorage::clear() {
     exec_blocks.clear();
+    new_blocks.clear();
 }
 
-std::vector<ExecBlock> ExecBlockStorage::dump() {
-    return std::vector<ExecBlock>(exec_blocks.begin(), exec_blocks.end());
+bool ExecBlockStorage::hasNext() {
+    return !new_blocks.empty();
+}
+
+ExecBlock ExecBlockStorage::getNext() {
+    ExecBlock block = new_blocks.front();
+    new_blocks.pop_front();
+    exec_blocks.push_back(block);
+    return block;
 }
 
 void TaskSim::sim(int endTime) {

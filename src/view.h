@@ -20,6 +20,8 @@ struct Pos {
     Pos(float x = 0.f, float y = 0.f) : x(x), y(y) {}
 
     Pos(sf::Vector2f v) : x(v.x), y(v.y) {}
+    Pos(sf::Vector2i v) : x(v.x), y(v.y) {}
+    Pos(sf::Vector2u v) : x(v.x), y(v.y) {}
 
     sf::Vector2f operator*() const {
         return {x, y};
@@ -51,9 +53,9 @@ struct Pos {
 };
 
 struct ExecBlockView {
-    const ExecBlock& block;
+    const ExecBlock block;
 
-    ExecBlockView(const ExecBlock& block) : block(block) {}
+    ExecBlockView(ExecBlock block) : block(block) {}
 
     float getX() const;
     float getY(bool task_based) const;
@@ -67,6 +69,7 @@ struct ExecBlockView {
 struct View {
     sf::RenderWindow window;
     Transform tf;
+    std::vector<ExecBlockView> blocks;
 
     View() {}
 

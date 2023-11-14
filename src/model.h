@@ -44,7 +44,9 @@ struct ExecBlock {
 
 // holds exec blocks and handles adding new ones (merges if necessary)
 class ExecBlockStorage {
+    bool dirty = false; // set to true when blocks added that may need to be merged
     std::deque<ExecBlock> exec_blocks;
+    std::deque<ExecBlock> new_blocks;
 public:
     ExecBlockStorage() {}
 
@@ -54,8 +56,11 @@ public:
     // empty out storage
     void clear();
 
-    // get all blocks in storage
-    std::vector<ExecBlock> dump();
+    // has new block
+    bool hasNext();
+
+    // get next new block, move it to exec_blocks
+    ExecBlock getNext();
 };
 
 struct TaskSim;

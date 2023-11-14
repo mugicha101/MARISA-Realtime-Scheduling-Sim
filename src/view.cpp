@@ -1,6 +1,7 @@
 #include "view.h"
 #include <vector>
 #include <cmath>
+#include <iostream>
 
 const int BLOCK_SPACING = 10;
 const int BLOCK_HEIGHT = 5;
@@ -19,20 +20,44 @@ bool View::isOpen() {
 
 void View::update(Model& model) {
     window.clear(sf::Color(200, 200, 200));
-    std::vector<ExecBlock> blocks = model.sim.ebs.dump();
+    while (model.sim.ebs.hasNext())
+        blocks.emplace_back(model.sim.ebs.getNext());
     Transform ltf = tf;
 
+    // find first and last block in range using bsearch
+    int start, end;
+    {
+        int l = 0;
+        int r = blocks.size()-1;
+        while (l != r) {
+            int m = (l + r) >> 1;
+            if ((blocks[m].getPos(false) * tf).x + (blocks[m].getDim()).x * tf.scale >= 0)
+                r = m;
+            else
+                l = m + 1;
+        }
+        start = l;
+        l = 0;
+        r = blocks.size()-1;
+        while (l != r) {
+            int m = (l + r + 1) >> 1;
+            if ((blocks[m].getPos(false) * tf).x <= window.getSize().x)
+                l = m;
+            else
+                r = m - 1;
+        }
+        end = l;
+    }
+
     // render task-based view
-    for (ExecBlock& block : blocks) {
-        ExecBlockView view(block);
-        view.draw(window, ltf, true);
+    for (int i = start; i <= end; ++i) {
+        blocks[i].draw(window, ltf, true);
     }
 
     // render core-based view
     ltf.dy += BLOCK_SPACING * (model.sim.task_set.size() + 1);
-    for (ExecBlock& block : blocks) {
-        ExecBlockView view(block);
-        view.draw(window, ltf, false);
+    for (int i = start; i <= end; ++i) {
+        blocks[i].draw(window, ltf, false);
     }
     window.display();
 }
