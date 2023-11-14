@@ -36,17 +36,19 @@ void assign_to_cores(const JobSet& active_jobs, CoreState& core_state, std::vect
 };
 
 // helper function to choose by highest priority then lowest index
-template<class T>
-std::vector<int> choose_by_priority(const JobSet& active_jobs, int cores, int time, T (*priority)(const Job&, int)) {
+template<class T, class D>
+std::vector<int> choose_by_priority(const JobSet& active_jobs, int cores, int time, T priority_threshold, D associated_data, T (*priority)(const Job&, int, D)) {
     std::vector<int> chosen_jobs;
     std::vector<T> job_priorities;
     job_priorities.reserve(active_jobs.size());
     for (const Job& job : active_jobs)
-        job_priorities.push_back(priority(job, time));
+        job_priorities.push_back(priority(job, time, associated_data));
     auto cmp = [&job_priorities](int i, int j) {
         return job_priorities[i] == job_priorities[j] ? i < j : job_priorities[i] > job_priorities[j];
     };
     for (int i = 0; i < active_jobs.size(); ++i) {
+        if (job_priorities[i] < priority_threshold)
+            continue;
         chosen_jobs.push_back(i);
         std::push_heap(chosen_jobs.begin(), chosen_jobs.end(), cmp);
         if (chosen_jobs.size() == cores + 1) {
@@ -67,7 +69,7 @@ CoreState TEMP::schedule(const JobSet& active_jobs, int cores, int time) {
 
 CoreState GRM::schedule(const JobSet& active_jobs, int cores, int time) {
     CoreState core_state(cores, -1);
-    assign_to_cores(active_jobs, core_state, choose_by_priority<int>(active_jobs, cores, time, [](const Job& job, int time) {
+    assign_to_cores(active_jobs, core_state, choose_by_priority<int,bool>(active_jobs, cores, time, INT_MIN, false, [](const Job& job, int time, bool) {
         return -job.period;
     }));
     return core_state;
@@ -75,7 +77,7 @@ CoreState GRM::schedule(const JobSet& active_jobs, int cores, int time) {
 
 CoreState GEDF::schedule(const JobSet& active_jobs, int cores, int time) {
     CoreState core_state(cores, -1);
-    assign_to_cores(active_jobs, core_state, choose_by_priority<int>(active_jobs, cores, time, [](const Job& job, int time) {
+    assign_to_cores(active_jobs, core_state, choose_by_priority<int,bool>(active_jobs, cores, time, INT_MIN, false, [](const Job& job, int time, bool) {
         return -job.deadline;
     }));
     return core_state;
@@ -83,7 +85,7 @@ CoreState GEDF::schedule(const JobSet& active_jobs, int cores, int time) {
 
 CoreState GFIFO::schedule(const JobSet& active_jobs, int cores, int time) {
     CoreState core_state(cores, -1);
-    assign_to_cores(active_jobs, core_state, choose_by_priority<int>(active_jobs, cores, time, [](const Job& job, int time) {
+    assign_to_cores(active_jobs, core_state, choose_by_priority<int,bool>(active_jobs, cores, time, INT_MIN, false, [](const Job& job, int time, bool) {
         return 0;
     }));
     return core_state;
@@ -93,7 +95,7 @@ CoreState PD2::schedule(const JobSet& active_jobs, int cores, int time) {
     // calculate priority of each job
     // pick k highest priorities
     CoreState core_state(cores, -1);
-    assign_to_cores(active_jobs, core_state, choose_by_priority<long long>(active_jobs, cores, time, [](const Job& job, int time) {
+    assign_to_cores(active_jobs, core_state, choose_by_priority<long long,bool>(active_jobs, cores, time, 0, early_release, [](const Job& job, int time, bool early_release) {
         auto get_itv = [&job](int work_done) {
             int rel_deadline = job.deadline - job.release_time;
             return std::make_pair(
@@ -103,8 +105,10 @@ CoreState PD2::schedule(const JobSet& active_jobs, int cores, int time) {
         };
         std::pair<int,int> first_itv = get_itv(job.runtime + 1);
 
-        // if first interval doesn't overlap, early release
-        if (first_itv.first > time)
+        // handle early releasing
+        if (early_release)
+            first_itv.first = 0;
+        else if (first_itv.first > time)
             return (long long)-1;
 
         // generate intervals to next group deadline

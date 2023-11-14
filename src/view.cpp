@@ -31,7 +31,7 @@ void View::update(Model& model) {
         int r = blocks.size()-1;
         while (l != r) {
             int m = (l + r) >> 1;
-            if ((blocks[m].getPos(false) * tf).x + (blocks[m].getDim()).x * tf.scale >= 0)
+            if ((blocks[m].getPos(false, block_stretch) * tf).x + (blocks[m].getDim(block_stretch)).x * tf.scale >= 0)
                 r = m;
             else
                 l = m + 1;
@@ -41,7 +41,7 @@ void View::update(Model& model) {
         r = blocks.size()-1;
         while (l != r) {
             int m = (l + r + 1) >> 1;
-            if ((blocks[m].getPos(false) * tf).x <= window.getSize().x)
+            if ((blocks[m].getPos(false, block_stretch) * tf).x <= window.getSize().x)
                 l = m;
             else
                 r = m - 1;
@@ -51,13 +51,13 @@ void View::update(Model& model) {
 
     // render task-based view
     for (int i = start; i <= end; ++i) {
-        blocks[i].draw(window, ltf, true);
+        blocks[i].draw(window, ltf, block_stretch, true);
     }
 
     // render core-based view
     ltf.dy += BLOCK_SPACING * (model.sim.task_set.size() + 1);
     for (int i = start; i <= end; ++i) {
-        blocks[i].draw(window, ltf, false);
+        blocks[i].draw(window, ltf, block_stretch, false);
     }
     window.display();
 }
@@ -78,12 +78,12 @@ float ExecBlockView::getHeight() const {
     return (float)BLOCK_HEIGHT;
 }
 
-Pos ExecBlockView::getPos(bool task_based) const {
-    return {getX(), getY(task_based)};
+Pos ExecBlockView::getPos(bool task_based, int block_stretch) const {
+    return {getX() * block_stretch, getY(task_based)};
 }
 
-Pos ExecBlockView::getDim() const {
-    return {getWidth(), getHeight()};
+Pos ExecBlockView::getDim(int block_stretch) const {
+    return {getWidth() * block_stretch, getHeight()};
 }
 
 sf::Color hue(float v) {
@@ -98,9 +98,9 @@ sf::Color hue(float v) {
     );
 };
 
-void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, bool task_based) const {
-    sf::RectangleShape rect(*(getDim() * tf.scale));
-    rect.move(*(getPos(task_based) * tf));
+void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based) const {
+    sf::RectangleShape rect(*(getDim(block_stretch) * tf.scale));
+    rect.move(*(getPos(task_based, block_stretch) * tf));
     rect.setFillColor(hue((task_based ? block.job_id : block.task_id) / 12.f));
     window.draw(rect);
 }

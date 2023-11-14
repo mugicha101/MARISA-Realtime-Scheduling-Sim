@@ -33,9 +33,10 @@ struct PEDF : public Scheduler {
     PEDF(int cores) : Scheduler(PriorityScheme::JOB_LEVEL_DYN, MigrationDegree::PARTITIONED, ScheduleEvent::JOB_RELEASE) {}
 };
 
-// PD2 with Early Releasing and Intra Sporadic
+// PD2 with optional Early Releasing and Intra Sporadic
 struct PD2 : public Scheduler {
-    PD2(int cores) : Scheduler(PriorityScheme::UNRESTRICTED_DYN, MigrationDegree::FULL, ScheduleEvent::QUANTUM) {}
+    bool early_release;
+    PD2(int cores, bool early_release = true) : Scheduler(PriorityScheme::UNRESTRICTED_DYN, MigrationDegree::FULL, ScheduleEvent::QUANTUM), early_release(early_release) {}
     CoreState schedule(const JobSet& active_jobs, int cores, int time) override;
 };
 

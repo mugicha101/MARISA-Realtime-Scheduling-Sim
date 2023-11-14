@@ -6,27 +6,22 @@
 
 const float MAX_ZOOM = 20.f;
 const float MIN_ZOOM = 0.5f;
+const float START_ZOOM = 2.0f;
 
 int main() {
     Model model;
     // setup test model
     TaskSet tset;
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(3, 1));
-    tset.push_back(Task(9, 4));
-    tset.push_back(Task(9, 4));
-    tset.push_back(Task(9, 4));
-    Scheduler* scheduler = new PD2(4);
+    for (int i = 0; i < 10; ++i)
+        tset.push_back(Task(16, 5));
+    for (int i = 0; i < 30; ++i)
+        tset.push_back(Task(16, 4));
+    Scheduler* scheduler = new PD2(20, true);
     scheduler->init(tset);
-    model.sim.reset(tset, scheduler, 4);
+    model.sim.reset(tset, scheduler, 20);
 
     View view;
+    view.tf.scale = START_ZOOM;
     const float init_scale = 0.8f;
     view.open(sf::VideoMode::getDesktopMode().width * init_scale, sf::VideoMode::getDesktopMode().height * init_scale);
     bool mouse_down = false;
@@ -70,6 +65,16 @@ int main() {
                     nmpos.x = event.mouseMove.x;
                     nmpos.y = event.mouseMove.y;
                     break;
+                case sf::Event::KeyPressed:
+                    switch (event.key.code) {
+                        case sf::Keyboard::Right:
+                            if (view.block_stretch < (1 << 20))
+                                view.block_stretch <<= 1;
+                            break;
+                        case sf::Keyboard::Left:
+                            if (view.block_stretch > 1)
+                                view.block_stretch >>= 1;
+                    }
             }
         }
 
