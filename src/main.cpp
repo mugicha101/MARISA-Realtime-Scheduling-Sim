@@ -23,14 +23,14 @@ int main() {
     model.sim.reset(tset, scheduler, 3);
 
     View view;
-    view.tf.scale = START_ZOOM;
+    view.tf = Transform::scale(START_ZOOM) * Transform::id();
     const float init_scale = 0.8f;
     view.open(sf::VideoMode::getDesktopMode().width * init_scale, sf::VideoMode::getDesktopMode().height * init_scale);
-    bool mouse_down = false;
-    Pos mpos;
-    bool mouse_lost = true;
+    MouseState mouse;
+    mouse.mouse_down = false;
+    mouse.mouse_lost = true;
     while (view.window.isOpen()) {
-        Pos nmpos = mpos;
+        Pos new_mouse_pos = mouse.screen_pos;
         bool mouse_moved = false;
         int zoom_action = 0.f;
 
@@ -49,23 +49,23 @@ int main() {
                     break;
                 case sf::Event::LostFocus:
                 case sf::Event::MouseLeft:
-                    mouse_down = false;
+                    mouse.mouse_down = false;
                 case sf::Event::GainedFocus:
-                    mouse_lost = true;
+                    mouse.mouse_lost = true;
                     break;
                 case sf::Event::MouseButtonPressed:
                     if (event.mouseButton.button == sf::Mouse::Left) {
-                        mouse_down = true;
-                        mouse_lost = true;
+                        mouse.mouse_down = true;
+                        mouse.mouse_lost = true;
                     }
                     break;
                 case sf::Event::MouseButtonReleased:
-                    if (event.mouseButton.button == sf::Mouse::Left) mouse_down = false;
+                    if (event.mouseButton.button == sf::Mouse::Left) mouse.mouse_down = false;
                     break;
                 case sf::Event::MouseMoved:
                     mouse_moved = true;
-                    nmpos.x = event.mouseMove.x;
-                    nmpos.y = event.mouseMove.y;
+                    new_mouse_pos.x = event.mouseMove.x;
+                    new_mouse_pos.y = event.mouseMove.y;
                     break;
                 case sf::Event::KeyPressed:
                     switch (event.key.code) {
@@ -82,30 +82,27 @@ int main() {
 
         // handle mouse actions
         if (mouse_moved) {
-            if (mouse_lost) {
-                mouse_lost = false;
-                mpos = nmpos;
+            if (mouse.mouse_lost) {
+                mouse.mouse_lost = false;
+                mouse.screen_pos = new_mouse_pos;
             }
-            Pos dmpos = nmpos - mpos;
-            if (mouse_down) {
-                view.tf.dx += dmpos.x / view.tf.scale;
-                view.tf.dy += dmpos.y / view.tf.scale;
+            Pos mouse_pos_change = new_mouse_pos - mouse.screen_pos;
+            if (mouse.mouse_down) {
+                view.tf = Transform::trans(mouse_pos_change.x, mouse_pos_change.y) * view.tf;
             }
-            mpos = nmpos;
+            mouse.screen_pos = new_mouse_pos;
         }
         if (zoom_action) {
             float zoom_factor = zoom_action == 1 ? 1.25f : 0.8f;
-            if (view.tf.scale * zoom_factor <= MAX_ZOOM && view.tf.scale * zoom_factor >= MIN_ZOOM) {
-                Pos offset(view.tf.dx, view.tf.dy);
-                offset = offset + mpos / (view.tf.scale * zoom_factor) - mpos / view.tf.scale;
-                view.tf.dx = offset.x;
-                view.tf.dy = offset.y;
-                view.tf.scale *= zoom_factor;
+            if (view.tf.sy() * zoom_factor <= MAX_ZOOM && view.tf.sy() * zoom_factor >= MIN_ZOOM) {
+                Pos sim_pos = mouse.screen_pos;
+                view.tf = Transform::trans(sim_pos.x, sim_pos.y) * Transform::scale(zoom_factor) * Transform::trans(-sim_pos.x, -sim_pos.y) * view.tf;
             }
         }
+        mouse.sim_pos = view.tf.inv() * mouse.screen_pos;
 
         // calc step - update model
-        int end_time = (int)std::ceil((Pos(view.window.getSize()) / view.tf).x);
+        int end_time = (int)std::ceil((view.tf.inv() * Pos(view.window.getSize())).x);
         model.sim.sim(end_time);
 
         // draw step - update view

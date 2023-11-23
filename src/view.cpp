@@ -44,6 +44,7 @@ void View::update(Model& model) {
     }
 
     // render each tasks exec blocks
+    Transform core_tracks_offset = Transform::trans(0.f, BLOCK_SPACING * (model.sim.task_set.size() + 1));
     for (int tid = 0; tid < model.sim.task_set.size(); ++tid) {
         std::vector<ExecBlockView>& taskBlocks = blocks[tid];
         Transform ltf = tf;
@@ -54,7 +55,7 @@ void View::update(Model& model) {
             int r = taskBlocks.size()-1;
             while (l != r) {
                 int m = (l + r) >> 1;
-                if ((taskBlocks[m].getPos(false, block_stretch) * tf).x + (taskBlocks[m].getDim(block_stretch)).x * tf.scale >= 0)
+                if ((tf * taskBlocks[m].getPos(false, block_stretch)).x + (taskBlocks[m].getDim(block_stretch)).x * tf.sx() >= 0)
                     r = m;
                 else
                     l = m + 1;
@@ -64,7 +65,7 @@ void View::update(Model& model) {
             r = taskBlocks.size()-1;
             while (l != r) {
                 int m = (l + r + 1) >> 1;
-                if ((taskBlocks[m].getPos(false, block_stretch) * tf).x <= window.getSize().x)
+                if ((tf * taskBlocks[m].getPos(false, block_stretch)).x <= window.getSize().x)
                     l = m;
                 else
                     r = m - 1;
@@ -78,9 +79,25 @@ void View::update(Model& model) {
         }
 
         // render core-based view
-        ltf.dy += BLOCK_SPACING * (model.sim.task_set.size() + 1);
+        ltf = ltf * core_tracks_offset;
         for (int i = start; i <= end; ++i) {
             taskBlocks[i].draw(window, ltf, block_stretch, false);
+        }
+    }
+
+    // DEBUG
+    auto debug = [&](float x, float y) {
+        Pos pos = tf * Pos(x, y);
+        Pos dim = tf.scale() * Pos(1, 1);
+        sf::RectangleShape rect(*dim);
+        rect.setPosition(*pos);
+        rect.setOrigin(rect.getSize().x * 0.5f, rect.getSize().y * 0.5f);
+        rect.setFillColor(sf::Color::Red);
+        window.draw(rect);
+    };
+    for (int x = -10; x <= 10; ++x) {
+        for (int y = -10; y <= 10; ++y) {
+            debug(x * 10, y * 10);
         }
     }
     window.display();
@@ -125,8 +142,8 @@ sf::Color hue(float v, float lighten) {
 
 void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based) const {
     // draw block
-    sf::RectangleShape rect(*(getDim(block_stretch) * tf.scale));
-    Pos blockPos = getPos(task_based, block_stretch) * tf;
+    sf::RectangleShape rect(*(tf.scale() * getDim(block_stretch)));
+    Pos blockPos = tf * getPos(task_based, block_stretch);
     rect.move(*blockPos);
     sf::Color color = hue((task_based ? block.job_id : block.task_id) / 12.f, 0.25f);
     if (std::min(rect.getSize().x, rect.getSize().y) <= BLOCK_OUTLINE * 2.f) {
@@ -170,12 +187,12 @@ void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stret
                 finRect.setSize(sf::Vector2f(width, height));
                 window.draw(finRect);
             };
-            float barHeight = (BLOCK_SPACING - BLOCK_HEIGHT) * 0.5f * tf.scale;
+            float barHeight = (BLOCK_SPACING - BLOCK_HEIGHT) * 0.5f * tf.sy();
             finRect.setPosition(baseRect.left + baseRect.width - BLOCK_OUTLINE * 0.5f, baseRect.top - barHeight * 0.5f);
             finRect.setFillColor(color);
             finRectDraw(BLOCK_OUTLINE, barHeight);
             finRect.setPosition(baseRect.left + baseRect.width - BLOCK_OUTLINE * 0.5f, baseRect.top - barHeight);
-            finRectDraw(std::min(20.f, 2.f * tf.scale * block_stretch), BLOCK_OUTLINE);
+            finRectDraw(std::min(20.f, 2.f * tf.sx() * block_stretch), BLOCK_OUTLINE);
         } break;
         case ExecBlock::MISSED: {
 
