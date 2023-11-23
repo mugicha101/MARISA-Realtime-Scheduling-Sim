@@ -186,8 +186,6 @@ void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stret
 sf::Font ExecBlockView::font;
 
 void ExecBlockView::init() {
-    for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::current_path()))
-        std::cout << entry.path() << std::endl;
     if (!font.loadFromFile("resources/font.otf")) {
         std::cout << "failed to load font" << std::endl;
     }
