@@ -9,5 +9,7 @@ if ($recompile) {
     cmake --build build --config Release
 }
 if (Test-Path -Path './build/bin/CMakeSFMLProject.exe') {
-    ./build/bin/CMakeSFMLProject.exe
+    cd ./build/bin
+    ./CMakeSFMLProject.exe
+    cd ../..
 }

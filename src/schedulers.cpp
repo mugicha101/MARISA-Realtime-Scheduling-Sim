@@ -123,6 +123,7 @@ CoreState PD2::schedule(const JobSet& active_jobs, int cores, int time) {
             curr_itv_len = curr_itv.second + 1 - curr_itv.first;
         };
         step_itv();
+        
         // priority order: deadline, is heavy, itv overlaps next, next group deadline
         long long priority = (long long)(INT_MAX - first_itv.second) << 32; // deadline of current interval
         if (job.exec_time + job.exec_time >= job.deadline) // heavy task

@@ -35,11 +35,13 @@ typedef std::vector<bool> Mask;
 typedef std::vector<int> CoreState;
 
 struct ExecBlock {
+    enum EndState {PREEMPTED, COMPLETED, MISSED};
     int task_id, job_id; // task and job that executed
     int core; // core executed on
     int start; // start time
-    int end; // end time (-1 if hasn't ended)
-    ExecBlock(int task_id, int job_id, int core, int start, int end = -1) : task_id(task_id), job_id(job_id), core(core), start(start), end(end) {}
+    int end; // end time
+    EndState endState; // state of end
+    ExecBlock(int task_id, int job_id, int core, int start, int end, EndState endState) : task_id(task_id), job_id(job_id), core(core), start(start), end(end), endState(endState) {}
 };
 
 // holds exec blocks and handles adding new ones (merges if necessary)
@@ -68,12 +70,12 @@ struct TaskSim;
 struct Scheduler {
     enum PriorityScheme { STATIC, JOB_LEVEL_DYN, UNRESTRICTED_DYN };
     enum MigrationDegree { PARTITIONED, RESTRICTED, FULL};
-    enum ScheduleEvent { JOB_RELEASE, QUANTUM };
+    enum DecisionType { EVENT_BASED, QUANTUM_BASED };
 
     const PriorityScheme priority_scheme;
     const MigrationDegree migration_degree;
-    const ScheduleEvent schedule_event;
-    Scheduler(PriorityScheme priority_scheme, MigrationDegree migration_degree, ScheduleEvent schedule_event) : priority_scheme(priority_scheme), migration_degree(migration_degree), schedule_event(schedule_event) {}
+    const DecisionType decision_type;
+    Scheduler(PriorityScheme priority_scheme, MigrationDegree migration_degree, DecisionType decision_type) : priority_scheme(priority_scheme), migration_degree(migration_degree), decision_type(decision_type) {}
 
     virtual void init(const TaskSet& task_set);
 

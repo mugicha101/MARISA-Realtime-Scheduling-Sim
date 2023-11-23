@@ -2,12 +2,19 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <filesystem>
 
-const int BLOCK_SPACING = 10;
-const int BLOCK_HEIGHT = 5;
+const float BLOCK_SPACING = 10.f;
+const float BLOCK_HEIGHT = 5.f;
+const float TEXT_MARGIN = 0.1f;
+const float BLOCK_OUTLINE = 3.f;
+
+void View::init() {
+    ExecBlockView::init();
+}
 
 void View::open(unsigned int width, unsigned int height) {
-    window.create(sf::VideoMode(width, height), "Marisa");
+    window.create(sf::VideoMode(width, height), "Multicore And Realtime Interactive Scheduling Analyzer (MARISA)");
 }
 
 void View::close() {
@@ -20,44 +27,61 @@ bool View::isOpen() {
 
 void View::update(Model& model) {
     window.clear(sf::Color(200, 200, 200));
-    while (model.sim.ebs.hasNext())
-        blocks.emplace_back(model.sim.ebs.getNext());
-    Transform ltf = tf;
+    blocks.resize(model.sim.task_set.size());
 
-    // find first and last block in range using bsearch
-    int start, end;
-    {
-        int l = 0;
-        int r = blocks.size()-1;
-        while (l != r) {
-            int m = (l + r) >> 1;
-            if ((blocks[m].getPos(false, block_stretch) * tf).x + (blocks[m].getDim(block_stretch)).x * tf.scale >= 0)
-                r = m;
-            else
-                l = m + 1;
+    // handle new exec blocks
+    while (model.sim.ebs.hasNext()) {
+        ExecBlock block = model.sim.ebs.getNext();
+        std::vector<ExecBlockView>& taskBlocks = blocks[block.task_id];
+        if (!taskBlocks.empty()) {
+            const ExecBlock& backBlock = taskBlocks.back().block;
+            if (backBlock.end == block.start && backBlock.job_id == block.job_id && backBlock.core == block.core) {
+                block.start = backBlock.start;
+                taskBlocks.pop_back();
+            }
         }
-        start = l;
-        l = 0;
-        r = blocks.size()-1;
-        while (l != r) {
-            int m = (l + r + 1) >> 1;
-            if ((blocks[m].getPos(false, block_stretch) * tf).x <= window.getSize().x)
-                l = m;
-            else
-                r = m - 1;
-        }
-        end = l;
+        blocks[block.task_id].emplace_back(block);
     }
 
-    // render task-based view
-    for (int i = start; i <= end; ++i) {
-        blocks[i].draw(window, ltf, block_stretch, true);
-    }
+    // render each tasks exec blocks
+    for (int tid = 0; tid < model.sim.task_set.size(); ++tid) {
+        std::vector<ExecBlockView>& taskBlocks = blocks[tid];
+        Transform ltf = tf;
+        // find first and last block in range using bsearch
+        int start, end;
+        {
+            int l = 0;
+            int r = taskBlocks.size()-1;
+            while (l != r) {
+                int m = (l + r) >> 1;
+                if ((taskBlocks[m].getPos(false, block_stretch) * tf).x + (taskBlocks[m].getDim(block_stretch)).x * tf.scale >= 0)
+                    r = m;
+                else
+                    l = m + 1;
+            }
+            start = l;
+            l = 0;
+            r = taskBlocks.size()-1;
+            while (l != r) {
+                int m = (l + r + 1) >> 1;
+                if ((taskBlocks[m].getPos(false, block_stretch) * tf).x <= window.getSize().x)
+                    l = m;
+                else
+                    r = m - 1;
+            }
+            end = l;
+        }
 
-    // render core-based view
-    ltf.dy += BLOCK_SPACING * (model.sim.task_set.size() + 1);
-    for (int i = start; i <= end; ++i) {
-        blocks[i].draw(window, ltf, block_stretch, false);
+        // render task-based view
+        for (int i = start; i <= end; ++i) {
+            taskBlocks[i].draw(window, ltf, block_stretch, true);
+        }
+
+        // render core-based view
+        ltf.dy += BLOCK_SPACING * (model.sim.task_set.size() + 1);
+        for (int i = start; i <= end; ++i) {
+            taskBlocks[i].draw(window, ltf, block_stretch, false);
+        }
     }
     window.display();
 }
@@ -86,10 +110,11 @@ Pos ExecBlockView::getDim(int block_stretch) const {
     return {getWidth() * block_stretch, getHeight()};
 }
 
-sf::Color hue(float v) {
-    auto calc = [](float f) {
+sf::Color hue(float v, float lighten) {
+    auto calc = [lighten](float f) {
         f = f - floor(f);
-        return std::clamp(2.f - (f > 0.5f ? 1.f - f : f) * 6.f, 0.f, 1.f) * 255.f;
+        f = std::clamp(2.f - (f > 0.5f ? 1.f - f : f) * 6.f, 0.f, 1.f);
+        return (f + (1.f - f) * lighten) * 255.f;
     };
     return sf::Color(
         calc(v),
@@ -99,8 +124,71 @@ sf::Color hue(float v) {
 };
 
 void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based) const {
+    // draw block
     sf::RectangleShape rect(*(getDim(block_stretch) * tf.scale));
-    rect.move(*(getPos(task_based, block_stretch) * tf));
-    rect.setFillColor(hue((task_based ? block.job_id : block.task_id) / 12.f));
+    Pos blockPos = getPos(task_based, block_stretch) * tf;
+    rect.move(*blockPos);
+    sf::Color color = hue((task_based ? block.job_id : block.task_id) / 12.f, 0.25f);
+    if (std::min(rect.getSize().x, rect.getSize().y) <= BLOCK_OUTLINE * 2.f) {
+        rect.setFillColor(color);
+        window.draw(rect);
+        return;
+    }
+    sf::Rect baseRect = rect.getGlobalBounds();
+    rect.move(BLOCK_OUTLINE, BLOCK_OUTLINE);
+    rect.setSize(sf::Vector2f(rect.getSize().x - BLOCK_OUTLINE * 2.f, rect.getSize().y - BLOCK_OUTLINE * 2.f));
+    rect.setFillColor(sf::Color::White);
+    rect.setOutlineColor(color);
+    rect.setOutlineThickness(BLOCK_OUTLINE);
     window.draw(rect);
+
+    // draw text
+    if (rect.getSize().x > 10.f) {
+        blockPos = Pos(rect.getPosition()) + Pos(rect.getSize()) * 0.5f;
+        sf::Text text;
+        text.setFont(font);
+        text.setString(label);
+        text.setCharacterSize(200);
+        text.setFillColor(sf::Color::Black);
+        text.setPosition(blockPos.x, blockPos.y);
+        text.setStyle(sf::Text::Bold);
+        sf::Rect textBounds = text.getGlobalBounds();
+        text.setOrigin(*(Pos(textBounds.getPosition()) - Pos(text.getPosition()) + Pos(textBounds.getSize()) * 0.5f));
+        float scale = std::min(0.15f, std::min(rect.getSize().x / (textBounds.width * (1.f + TEXT_MARGIN)), rect.getSize().y / (textBounds.height  * (1.f + TEXT_MARGIN))));
+        text.setScale(scale, scale);
+        window.draw(text);
+    }
+
+    // draw marks based on end state
+    switch (block.endState) {
+        case ExecBlock::PREEMPTED:
+            break;
+        case ExecBlock::COMPLETED: {
+            sf::RectangleShape finRect;
+            auto finRectDraw = [&](float width, float height) {
+                finRect.setOrigin(width * 0.5f, height * 0.5f);
+                finRect.setSize(sf::Vector2f(width, height));
+                window.draw(finRect);
+            };
+            float barHeight = (BLOCK_SPACING - BLOCK_HEIGHT) * 0.5f * tf.scale;
+            finRect.setPosition(baseRect.left + baseRect.width - BLOCK_OUTLINE * 0.5f, baseRect.top - barHeight * 0.5f);
+            finRect.setFillColor(color);
+            finRectDraw(BLOCK_OUTLINE, barHeight);
+            finRect.setPosition(baseRect.left + baseRect.width - BLOCK_OUTLINE * 0.5f, baseRect.top - barHeight);
+            finRectDraw(std::min(20.f, 2.f * tf.scale * block_stretch), BLOCK_OUTLINE);
+        } break;
+        case ExecBlock::MISSED: {
+
+        } break;
+    }
+}
+
+sf::Font ExecBlockView::font;
+
+void ExecBlockView::init() {
+    for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::current_path()))
+        std::cout << entry.path() << std::endl;
+    if (!font.loadFromFile("resources/font.otf")) {
+        std::cout << "failed to load font" << std::endl;
+    }
 }

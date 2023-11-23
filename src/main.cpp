@@ -4,21 +4,23 @@
 #include <iostream>
 #include <cmath>
 
-const float MAX_ZOOM = 20.f;
+const float MAX_ZOOM = 50.f;
 const float MIN_ZOOM = 0.5f;
 const float START_ZOOM = 2.0f;
 
 int main() {
+    View::init();
     Model model;
     // setup test model
     TaskSet tset;
-    for (int i = 0; i < 10; ++i)
-        tset.push_back(Task(16, 5));
-    for (int i = 0; i < 30; ++i)
-        tset.push_back(Task(16, 4));
-    Scheduler* scheduler = new PD2(20, true);
+    tset.push_back(Task(20, 15));
+    tset.push_back(Task(10, 5));
+    tset.push_back(Task(20, 8));
+    tset.push_back(Task(10, 8));
+    tset.push_back(Task(20, 11));
+    Scheduler* scheduler = new PD2(true);
     scheduler->init(tset);
-    model.sim.reset(tset, scheduler, 20);
+    model.sim.reset(tset, scheduler, 3);
 
     View view;
     view.tf.scale = START_ZOOM;

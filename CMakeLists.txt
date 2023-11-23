@@ -10,11 +10,14 @@ FetchContent_Declare(SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
-file(GLOB src CONFIGURE_DEPENDS "src/*.h" "src/*.cpp")
+file(GLOB src CONFIGURE_DEPENDS "src/*.h" "src/*.cpp" "src/linux_sched/*.c" "src/linux_sched/rbtree_deps/*.h")
 add_executable(CMakeSFMLProject ${src})
 target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics)
 target_compile_features(CMakeSFMLProject PRIVATE cxx_std_17)
 add_compile_definitions(_USE_MATH_DEFINES)
+add_custom_command(TARGET CMakeSFMLProject PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/src/resources $<TARGET_FILE_DIR:CMakeSFMLProject>/resources)
 if(WIN32)
     add_custom_command(
         TARGET CMakeSFMLProject

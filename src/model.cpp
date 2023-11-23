@@ -15,7 +15,9 @@ CoreState Scheduler::schedule(const JobSet& active_jobs, int cores, int buffer) 
 }
 
 void ExecBlockStorage::add_block(const Job& job, int start, int end) {
-    new_blocks.emplace_back(job.task_id, job.job_id, job.core, start, end);
+    new_blocks.emplace_back(job.task_id, job.job_id, job.core, start, end,
+        job.runtime >= job.exec_time ? ExecBlock::COMPLETED : job.deadline <= end ? ExecBlock::MISSED : ExecBlock::PREEMPTED
+    );
 }
 
 void ExecBlockStorage::clear() {
@@ -72,8 +74,8 @@ void TaskSim::sim(int endTime) {
 
         // find next event
         int next_event = INT_MAX;
-        switch (scheduler->schedule_event) {
-            case Scheduler::ScheduleEvent::JOB_RELEASE:
+        switch (scheduler->decision_type) {
+            case Scheduler::DecisionType::EVENT_BASED:
                 // job release
                 for (Task& task : task_set)
                     next_event = std::min(next_event, task.next_release);
@@ -84,7 +86,7 @@ void TaskSim::sim(int endTime) {
                         next_event = std::min(next_event, buffer + job.exec_time - job.runtime);
                 }
                 break;
-            case Scheduler::ScheduleEvent::QUANTUM:
+            case Scheduler::DecisionType::QUANTUM_BASED:
                 next_event = buffer + 1;
                 break;
         }
@@ -95,8 +97,8 @@ void TaskSim::sim(int endTime) {
         for (int i = 0; i < active_jobs.size(); ++i) {
             Job& job = active_jobs[i];
             if (job.running) {
-                ebs.add_block(job, buffer, next_event);
                 job.runtime += delta_time;
+                ebs.add_block(job, buffer, next_event);
             }
             if (job.runtime == job.exec_time)
                 continue;

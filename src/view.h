@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include "model.h"
 #include <utility>
+#include <string>
 
 // represents offset then scale
 struct Transform {
@@ -53,9 +54,15 @@ struct Pos {
 };
 
 struct ExecBlockView {
-    const ExecBlock block;
+    static sf::Font font;
+    static void init();
 
-    ExecBlockView(ExecBlock block) : block(block) {}
+    const ExecBlock block;
+    std::string label;
+
+    ExecBlockView(ExecBlock block) : block(block) {
+        label = std::to_string(block.task_id) + "," + std::to_string(block.job_id);
+    }
 
     float getX() const;
     float getY(bool task_based) const;
@@ -67,9 +74,11 @@ struct ExecBlockView {
 };
 
 struct View {
+    static void init();
+    
     sf::RenderWindow window;
     Transform tf;
-    std::vector<ExecBlockView> blocks;
+    std::vector<std::vector<ExecBlockView>> blocks;
     int block_stretch = 1;
 
     View() {}
