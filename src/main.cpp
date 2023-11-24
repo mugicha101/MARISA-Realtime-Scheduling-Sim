@@ -18,6 +18,7 @@ int main() {
     tset.push_back(Task(20, 8));
     tset.push_back(Task(10, 8));
     tset.push_back(Task(20, 11));
+    tset.push_back(Task(100, 1));
     Scheduler* scheduler = new PD2(true);
     scheduler->init(tset);
     model.sim.reset(tset, scheduler, 3);
@@ -30,11 +31,11 @@ int main() {
     mouse.mouse_down = false;
     mouse.mouse_lost = true;
     while (view.window.isOpen()) {
-        Pos new_mouse_pos = mouse.screen_pos;
-        bool mouse_moved = false;
-        int zoom_action = 0.f;
-
         // input step - handle events
+        Pos new_mouse_pos = mouse.pos;
+        bool mouse_moved = false;
+        bool old_mouse_down = mouse.mouse_down;
+        int zoom_action = 0.f;
         for (auto event = sf::Event{}; view.window.pollEvent(event);) {
             switch (event.type) {
                 case sf::Event::Closed:
@@ -84,28 +85,28 @@ int main() {
         if (mouse_moved) {
             if (mouse.mouse_lost) {
                 mouse.mouse_lost = false;
-                mouse.screen_pos = new_mouse_pos;
+                mouse.pos = new_mouse_pos;
             }
-            Pos mouse_pos_change = new_mouse_pos - mouse.screen_pos;
+            Pos mouse_pos_change = new_mouse_pos - mouse.pos;
             if (mouse.mouse_down) {
                 view.tf = Transform::trans(mouse_pos_change.x, mouse_pos_change.y) * view.tf;
             }
-            mouse.screen_pos = new_mouse_pos;
+            mouse.pos = new_mouse_pos;
         }
         if (zoom_action) {
             float zoom_factor = zoom_action == 1 ? 1.25f : 0.8f;
             if (view.tf.sy() * zoom_factor <= MAX_ZOOM && view.tf.sy() * zoom_factor >= MIN_ZOOM) {
-                Pos sim_pos = mouse.screen_pos;
+                Pos sim_pos = mouse.pos;
                 view.tf = Transform::trans(sim_pos.x, sim_pos.y) * Transform::scale(zoom_factor) * Transform::trans(-sim_pos.x, -sim_pos.y) * view.tf;
             }
         }
-        mouse.sim_pos = view.tf.inv() * mouse.screen_pos;
+        mouse.just_changed = mouse.mouse_down != old_mouse_down;
 
         // calc step - update model
         int end_time = (int)std::ceil((view.tf.inv() * Pos(view.window.getSize())).x);
         model.sim.sim(end_time);
 
         // draw step - update view
-        view.update(model);
+        view.update(model, mouse);
     }
 }

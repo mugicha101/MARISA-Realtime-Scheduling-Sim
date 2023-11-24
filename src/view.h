@@ -126,17 +126,15 @@ struct Transform {
 struct MouseState {
     bool mouse_down;
     bool just_changed;
-    Pos sim_pos;
-    Pos screen_pos;
+    Pos pos;
     bool mouse_lost;
 };
 
-// TODO
 struct MouseRegion {
     Pos pos;
     Pos dim;
     MouseRegion(Pos pos = Pos(), Pos dim = Pos()) : pos(pos), dim(dim) {}
-    bool mouseTouching(const MouseState& mouse, bool screen_coords = false); // return true if touching mouse
+    bool mouseTouching(const MouseState& mouse, Transform tf);
 };
 
 struct ExecBlockView {
@@ -146,7 +144,8 @@ struct ExecBlockView {
     const ExecBlock block;
     std::string label;
 
-    MouseRegion mouseRegions[2];
+    MouseRegion task_mr;
+    MouseRegion core_mr;
 
     ExecBlockView(ExecBlock block) : block(block) {
         label = std::to_string(block.task_id) + "," + std::to_string(block.job_id);
@@ -158,8 +157,8 @@ struct ExecBlockView {
     float getHeight() const;
     Pos getPos(bool task_based, int block_stretch) const;
     Pos getDim(int block_stretch) const;
-    bool mouseTouching(const MouseState& mouse); // return true if mouse hovered over
-    void draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based) const;
+    bool mouseTouching(const MouseState& mouse, Transform tf, Transform core_tracks_offset, int block_stretch); // return true if mouse hovered over
+    void draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based, bool focused) const;
 };
 
 struct View {
@@ -182,7 +181,7 @@ struct View {
     bool isOpen();
 
     // updates display
-    void update(Model& model);
+    void update(Model& model, const MouseState& mosue);
 };
 
 #endif
