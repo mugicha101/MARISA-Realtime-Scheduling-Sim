@@ -134,12 +134,22 @@ struct MouseRegion {
     Pos pos;
     Pos dim;
     MouseRegion(Pos pos = Pos(), Pos dim = Pos()) : pos(pos), dim(dim) {}
+    sf::Rect<float> boundingBox(Transform tf);
     bool mouseTouching(const MouseState& mouse, Transform tf);
+};
+
+struct TextBox : public MouseRegion {
+    int font_size;
+    float value;
+    static sf::Font font;
+    static void init(sf::Font font);
+    TextBox(Pos pos = Pos(), Pos dim = Pos(), int font_size = 12, float init_value = 0.f) : MouseRegion(pos, dim), font_size(font_size), value(init_value) {}
+    void draw(sf::RenderWindow& window, Transform tf);
 };
 
 struct ExecBlockView {
     static sf::Font font;
-    static void init();
+    static void init(sf::Font font);
 
     const ExecBlock block;
     std::string label;
@@ -162,6 +172,7 @@ struct ExecBlockView {
 };
 
 struct View {
+    static sf::Font font;
     static void init();
     
     sf::RenderWindow window;
@@ -181,7 +192,7 @@ struct View {
     bool isOpen();
 
     // updates display
-    void update(Model& model, const MouseState& mosue);
+    void update(Model& model, const MouseState& mouse, float fps);
 };
 
 #endif

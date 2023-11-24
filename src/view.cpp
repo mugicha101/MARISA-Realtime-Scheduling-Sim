@@ -9,8 +9,13 @@ const float BLOCK_HEIGHT = 5.f;
 const float TEXT_MARGIN = 0.1f;
 const float BLOCK_OUTLINE = 3.f;
 
+sf::Font View::font;
 void View::init() {
-    ExecBlockView::init();
+    if (!font.loadFromFile("resources/font.otf")) {
+        std::cout << "failed to load font" << std::endl;
+    }
+    ExecBlockView::init(font);
+    TextBox::init(font);
 }
 
 void View::open(unsigned int width, unsigned int height) {
@@ -25,10 +30,23 @@ bool View::isOpen() {
     return window.isOpen();
 }
 
-void View::update(Model& model, const MouseState& mouse) {
+void View::update(Model& model, const MouseState& mouse, float fps) {
     TaskSim& sim = model.sim;
     window.setView(sf::View(sf::FloatRect(0.f, 0.f, window.getSize().x, window.getSize().y)));
+
+    // draw background grid
     window.clear(sf::Color(200, 200, 200));
+    float offset = tf.sx() * block_stretch;
+    while (offset < 20.f) offset *= 10.f;
+    float grid_pos = (tf * Pos(0.f, 0.f)).x - BLOCK_OUTLINE * 0.5f;
+    grid_pos = std::max(grid_pos, std::fmod(std::fmod(grid_pos, offset) + offset, offset));
+    sf::RectangleShape rect(sf::Vector2f(BLOCK_OUTLINE, window.getSize().y));
+    rect.setFillColor(sf::Color(180, 180, 180));
+    while (grid_pos < window.getSize().x) {
+        rect.setPosition(grid_pos, 0.f);
+        window.draw(rect);
+        grid_pos += offset;
+    }
 
     // handle new exec blocks
     blocks.resize(sim.task_set.size());
@@ -112,7 +130,14 @@ void View::update(Model& model, const MouseState& mouse) {
     }
 
     // draw ui
-
+    sf::Text text;
+    text.setFillColor(sf::Color::Blue);
+    text.setFont(font);
+    text.setCharacterSize(15);
+    text.setString(std::to_string((int)std::floor(fps)) + " fps");
+    sf::Rect text_bounds = text.getGlobalBounds();
+    text.setPosition(window.getSize().x - text_bounds.getSize().x - 5.f, 5.f);
+    window.draw(text);
 
     // display call
     window.display();
@@ -225,13 +250,30 @@ void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stret
 
 sf::Font ExecBlockView::font;
 
-void ExecBlockView::init() {
-    if (!font.loadFromFile("resources/font.otf")) {
-        std::cout << "failed to load font" << std::endl;
-    }
+void ExecBlockView::init(sf::Font font) {
+    ExecBlockView::font = font;
+}
+
+sf::Font TextBox::font;
+
+void TextBox::init(sf::Font font) {
+    ExecBlockView::font = font;
+}
+
+void TextBox::draw(sf::RenderWindow& window, Transform tf) {
+    sf::Rect<float> bounds = boundingBox(tf);
+    sf::RectangleShape rect(bounds.getSize());
+    rect.setPosition(bounds.getPosition());
+    rect.setFillColor(sf::Color::White);
+    rect.setOutlineColor(sf::Color::Black);
+    rect.setOutlineThickness(BLOCK_OUTLINE);
+    window.draw(rect);
+}
+
+sf::Rect<float> MouseRegion::boundingBox(Transform tf) {
+    return sf::Rect<float>(*(tf * pos), *(tf.scale() * dim));
 }
 
 bool MouseRegion::mouseTouching(const MouseState& mouse, Transform tf) {
-    sf::Rect rect(*(tf * pos), *(tf.scale() * dim));
-    return rect.contains(*mouse.pos);
+    return boundingBox(tf).contains(*mouse.pos);
 }

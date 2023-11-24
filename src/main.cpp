@@ -3,6 +3,7 @@
 #include "schedulers.h"
 #include <iostream>
 #include <cmath>
+#include <deque>
 
 const float MAX_ZOOM = 50.f;
 const float MIN_ZOOM = 0.5f;
@@ -18,7 +19,7 @@ int main() {
     tset.push_back(Task(20, 8));
     tset.push_back(Task(10, 8));
     tset.push_back(Task(20, 11));
-    tset.push_back(Task(100, 1));
+    // tset.push_back(Task(100, 1));
     Scheduler* scheduler = new PD2(true);
     scheduler->init(tset);
     model.sim.reset(tset, scheduler, 3);
@@ -30,7 +31,13 @@ int main() {
     MouseState mouse;
     mouse.mouse_down = false;
     mouse.mouse_lost = true;
+    sf::Clock clock;
+    std::deque<long long> frame_time_history;
+    long long frame_time_sum = 0.f;
     while (view.window.isOpen()) {
+        clock.restart();
+        float fps = 1000000.f * (float)frame_time_history.size() / (float)frame_time_sum;
+
         // input step - handle events
         Pos new_mouse_pos = mouse.pos;
         bool mouse_moved = false;
@@ -107,6 +114,15 @@ int main() {
         model.sim.sim(end_time);
 
         // draw step - update view
-        view.update(model, mouse);
+        view.update(model, mouse, fps);
+
+        // timing analysis
+        long long frame_time = clock.getElapsedTime().asMicroseconds();
+        frame_time_history.push_back(frame_time);
+        frame_time_sum += frame_time;
+        if (frame_time_history.size() > 60) {
+            frame_time_sum -= frame_time_history.front();
+            frame_time_history.pop_front();
+        }
     }
 }
