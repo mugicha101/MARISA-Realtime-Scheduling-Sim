@@ -139,12 +139,24 @@ struct MouseRegion {
 };
 
 struct TextBox : public MouseRegion {
-    int font_size;
-    float value;
+    float font_size;
+    std::string value;
     static sf::Font font;
     static void init(sf::Font font);
-    TextBox(Pos pos = Pos(), Pos dim = Pos(), int font_size = 12, float init_value = 0.f) : MouseRegion(pos, dim), font_size(font_size), value(init_value) {}
+    bool align_middle; // centered on vertical axis
+    TextBox(Pos pos = Pos(), Pos dim = Pos(), float font_size = 1.f, std::string init_value = "", bool align_middle = false) : MouseRegion(pos, dim), font_size(font_size), value(init_value), align_middle(align_middle) {}
     void draw(sf::RenderWindow& window, Transform tf);
+};
+
+struct TaskEditor {
+    TextBox tb_phase;
+    TextBox tb_period;
+    TextBox tb_exec;
+    TextBox tb_deadline;
+
+    TaskEditor() {}
+
+    void draw(sf::RenderWindow& window, Transform tf, Task& task, int tid);
 };
 
 struct ExecBlockView {
@@ -171,7 +183,7 @@ struct ExecBlockView {
     void draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based, bool focused) const;
 };
 
-struct View {
+struct Visualizer {
     static sf::Font font;
     static void init();
     
@@ -180,7 +192,9 @@ struct View {
     std::vector<std::vector<ExecBlockView>> blocks;
     int block_stretch = 1;
 
-    View() {}
+    std::vector<TaskEditor> task_editors;
+
+    Visualizer() {}
 
     // opens window
     void open(unsigned int width, unsigned int height);
@@ -192,7 +206,7 @@ struct View {
     bool isOpen();
 
     // updates display
-    void update(Model& model, const MouseState& mouse, float fps);
+    void update(SimModel& model, const MouseState& mouse, float fps);
 };
 
 #endif

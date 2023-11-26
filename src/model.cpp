@@ -36,11 +36,11 @@ ExecBlock ExecBlockStorage::getNext() {
     return block;
 }
 
-void TaskSim::sim(int endTime) {
-    while (missed == -1 && buffer < endTime) {
+void SimModel::sim(int endTime) {
+    while (missed == -1 && time < endTime) {
         // handle job releases at buffer time
         for (int i = 0; i < task_set.size(); ++i)
-            if (task_set[i].next_release == buffer)
+            if (task_set[i].next_release == time)
                 active_jobs.push_back(task_set[i].next_job(i));
 
         // sort jobs by executing first then preemptive then fresh
@@ -61,7 +61,7 @@ void TaskSim::sim(int endTime) {
         swap(sorted_jobs, active_jobs);
 
         // schedule
-        CoreState core_state = scheduler->schedule(active_jobs, cores, buffer);
+        CoreState core_state = scheduler->schedule(active_jobs, cores, time);
         assert(core_state.size() == cores);
         for (int i = 0; i < active_jobs.size(); ++i)
             active_jobs[i].running = false;
@@ -83,45 +83,41 @@ void TaskSim::sim(int endTime) {
                 for (Job& job : active_jobs) {
                     next_event = std::min(next_event, job.deadline);
                     if (job.core != -1)
-                        next_event = std::min(next_event, buffer + job.exec_time - job.runtime);
+                        next_event = std::min(next_event, time + job.exec_time - job.runtime);
                 }
                 break;
             case Scheduler::DecisionType::QUANTUM_BASED:
-                next_event = buffer + 1;
+                next_event = time + 1;
                 break;
         }
-        int delta_time = next_event - buffer;
+        int delta_time = next_event - time;
 
         // update exec blocks and buffer + handle job deadlines (and misses)
-        JobSet updated_active_jobs;
+        int j = -1;
         for (int i = 0; i < active_jobs.size(); ++i) {
             Job& job = active_jobs[i];
             if (job.running) {
                 job.runtime += delta_time;
-                ebs.add_block(job, buffer, next_event);
+                ebs.add_block(job, time, next_event);
             }
-            if (job.runtime == job.exec_time)
+            if (job.runtime == job.exec_time) {
+                finished_jobs.push_back(job);
                 continue;
+            }
             if (job.deadline == next_event)
                 missed = i;
-            updated_active_jobs.push_back(job);
+            active_jobs[++j] = job;
         }
-        std::swap(updated_active_jobs, active_jobs);
-        buffer = next_event;
+        active_jobs.resize(j+1);
+        time = next_event;
     }
 }
 
-void TaskSim::seek(int t) {
-    sim(t);
-    cursor = std::min(t, buffer);
-}
-
-void TaskSim::reset(TaskSet task_set, Scheduler* scheduler, int cores) {
+void SimModel::reset(TaskSet task_set, Scheduler* scheduler, int cores) {
     this->task_set = task_set;
     this->scheduler = scheduler;
     this->cores = cores;
-    buffer = 0;
-    cursor = 0;
+    time = 0;
     missed = -1;
     active_jobs.clear();
     finished_jobs.clear();

@@ -10,7 +10,6 @@ struct Job {
     int job_id;
     int period, release_time, exec_time, deadline; // basic job/task stats
     int runtime = 0; // time job has executed for
-    int finishTime = -1; // time job finishes (-1 if unfinished)
     int core = -1; // core the job was last on (or currently on if running) (-1 if not executed yet)
     bool running = false; // true if the job is currently running
     Job(int task_id = -1, int job_id = -1, int period = 0, int release_time = 0, int exec_time = 0, int deadline = 0) : task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
@@ -29,10 +28,9 @@ struct Task {
     Job next_job(int task_id);
 };
 
-typedef std::vector<Task> TaskSet;
-typedef std::vector<Job> JobSet;
-typedef std::vector<bool> Mask;
-typedef std::vector<int> CoreState;
+typedef std::vector<Task> TaskSet; // task_set[i] = task with task id i
+typedef std::vector<Job> JobSet; // job_set[i] = job with job id i
+typedef std::vector<int> CoreState; // core_state[i] = job id of job scheduled on core i (-1 if idle)
 
 struct ExecBlock {
     enum EndState {PREEMPTED, COMPLETED, MISSED};
@@ -44,9 +42,8 @@ struct ExecBlock {
     ExecBlock(int task_id, int job_id, int core, int start, int end, EndState endState) : task_id(task_id), job_id(job_id), core(core), start(start), end(end), endState(endState) {}
 };
 
-// holds exec blocks and handles adding new ones (merges if necessary)
+// holds exec blocks and handles adding new ones
 class ExecBlockStorage {
-    bool dirty = false; // set to true when blocks added that may need to be merged
     std::deque<ExecBlock> exec_blocks;
     std::deque<ExecBlock> new_blocks;
 public:
@@ -65,8 +62,6 @@ public:
     ExecBlock getNext();
 };
 
-struct TaskSim;
-
 struct Scheduler {
     enum PriorityScheme { STATIC, JOB_LEVEL_DYN, UNRESTRICTED_DYN };
     enum MigrationDegree { PARTITIONED, RESTRICTED, FULL};
@@ -83,20 +78,19 @@ struct Scheduler {
     virtual CoreState schedule(const JobSet& active_jobs, int cores, int time);
 };
 
-struct TaskSim {
+struct SimModel {
     TaskSet task_set;
     Scheduler* scheduler = nullptr;
     ExecBlockStorage ebs;
 
-    int buffer = 0; // next unsimulated event time (cursor <= buffer)
-    int cursor = 0; // time cursor is at
+    int time = 0; // time of next unhandled scheduling decision
     int missed = -1; // missed job time (-1 if none)
     int cores = 1; // number of CPU cores available
 
     JobSet active_jobs;
     JobSet finished_jobs;
 
-    TaskSim() {}
+    SimModel() {}
     
     // reset and init task sim with given task set and scheduler
     void reset(TaskSet task_set, Scheduler* scheduler, int cores);
@@ -104,14 +98,6 @@ struct TaskSim {
     // simulates to at least endTime (ignore if endTime <= buffer)
     // handles execBlocks, finding next event, and updating job object bookkeeping 
     void sim(int endTime);
-    
-    // moves cursor to t (simulates to at least t)
-    void seek(int t);
-};
-
-struct Model {
-    TaskSim sim;
-    Model() {}
 };
 
 #endif

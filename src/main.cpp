@@ -10,8 +10,8 @@ const float MIN_ZOOM = 0.5f;
 const float START_ZOOM = 2.0f;
 
 int main() {
-    View::init();
-    Model model;
+    Visualizer::init();
+    SimModel model;
     // setup test model
     TaskSet tset;
     tset.push_back(Task(20, 15));
@@ -22,9 +22,9 @@ int main() {
     // tset.push_back(Task(100, 1));
     Scheduler* scheduler = new PD2(true);
     scheduler->init(tset);
-    model.sim.reset(tset, scheduler, 3);
+    model.reset(tset, scheduler, 3);
 
-    View view;
+    Visualizer view;
     view.tf = Transform::scale(START_ZOOM) * Transform::id();
     const float init_scale = 0.8f;
     view.open(sf::VideoMode::getDesktopMode().width * init_scale, sf::VideoMode::getDesktopMode().height * init_scale);
@@ -111,7 +111,7 @@ int main() {
 
         // calc step - update model
         int end_time = (int)std::ceil((view.tf.inv() * Pos(view.window.getSize())).x);
-        model.sim.sim(end_time);
+        model.sim(end_time);
 
         // draw step - update view
         view.update(model, mouse, fps);
