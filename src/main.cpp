@@ -5,7 +5,7 @@
 #include <cmath>
 #include <deque>
 
-const float MAX_ZOOM = 50.f;
+const float MAX_ZOOM = 10000.f;
 const float MIN_ZOOM = 0.5f;
 const float START_ZOOM = 2.0f;
 
@@ -19,10 +19,10 @@ int main() {
     tset.push_back(Task(20, 8));
     tset.push_back(Task(10, 8));
     tset.push_back(Task(20, 11));
-    // tset.push_back(Task(100, 1));
-    Scheduler* scheduler = new PD2(true);
+    tset.push_back(Task(Fraction(11,12), Fraction(2,9)));
+    Scheduler* scheduler = new GEDF(true);
     scheduler->init(tset);
-    model.reset(tset, scheduler, 3);
+    model.reset(tset, scheduler, 5);
 
     Visualizer view;
     view.tf = Transform::scale(START_ZOOM) * Transform::id();

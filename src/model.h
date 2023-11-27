@@ -1,6 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "fraction.h"
 #include <vector>
 #include <memory>
 #include <deque>
@@ -8,21 +9,21 @@
 struct Job {
     int task_id;
     int job_id;
-    int period, release_time, exec_time, deadline; // basic job/task stats
-    int runtime = 0; // time job has executed for
+    Fraction period, release_time, exec_time, deadline; // basic job/task stats
+    Fraction runtime = 0; // time job has executed for
     int core = -1; // core the job was last on (or currently on if running) (-1 if not executed yet)
     bool running = false; // true if the job is currently running
-    Job(int task_id = -1, int job_id = -1, int period = 0, int release_time = 0, int exec_time = 0, int deadline = 0) : task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
+    Job(int task_id = -1, int job_id = -1, Fraction period = 0, Fraction release_time = 0, Fraction exec_time = 0, Fraction deadline = 0) : task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
 };
 
 struct Task {
-    int phase, period, exec_time, relative_deadline;
+    Fraction phase, period, exec_time, relative_deadline;
     int next_job_id = 0;
-    int next_release;
-    Task(int phase, int period, int exec_time, int relative_deadline) : phase(phase), period(period), exec_time(exec_time), relative_deadline(relative_deadline), next_release(phase) {}
+    Fraction next_release;
+    Task(Fraction phase, Fraction period, Fraction exec_time, Fraction relative_deadline) : phase(phase), period(period), exec_time(exec_time), relative_deadline(relative_deadline), next_release(phase) {}
     Task() : Task(0, 0, 0, 0) {}
-    Task(int period, int exec_time, int relative_deadline) : Task(0, period, exec_time, relative_deadline) {}
-    Task(int period, int exec_time) : Task(0, period, exec_time, period) {}
+    Task(Fraction period, Fraction exec_time, Fraction relative_deadline) : Task(0, period, exec_time, relative_deadline) {}
+    Task(Fraction period, Fraction exec_time) : Task(0, period, exec_time, period) {}
 
     // create next job for this task (task_id = id of this task which is handled externally)
     Job next_job(int task_id);
@@ -36,10 +37,10 @@ struct ExecBlock {
     enum EndState {PREEMPTED, COMPLETED, MISSED};
     int task_id, job_id; // task and job that executed
     int core; // core executed on
-    int start; // start time
-    int end; // end time
+    Fraction start; // start time
+    Fraction end; // end time
     EndState endState; // state of end
-    ExecBlock(int task_id, int job_id, int core, int start, int end, EndState endState) : task_id(task_id), job_id(job_id), core(core), start(start), end(end), endState(endState) {}
+    ExecBlock(int task_id, int job_id, int core, Fraction start, Fraction end, EndState endState) : task_id(task_id), job_id(job_id), core(core), start(start), end(end), endState(endState) {}
 };
 
 // holds exec blocks and handles adding new ones
@@ -50,7 +51,7 @@ public:
     ExecBlockStorage() {}
 
     // add a block to storage
-    void add_block(const Job& job, int start, int end);
+    void add_block(const Job& job, Fraction start, Fraction end);
 
     // empty out storage
     void clear();
@@ -75,7 +76,7 @@ struct Scheduler {
     virtual void init(const TaskSet& task_set);
 
     // assign jobs to cores
-    virtual CoreState schedule(const JobSet& active_jobs, int cores, int time);
+    virtual CoreState schedule(const JobSet& active_jobs, int cores, Fraction time);
 };
 
 struct SimModel {
@@ -83,7 +84,7 @@ struct SimModel {
     Scheduler* scheduler = nullptr;
     ExecBlockStorage ebs;
 
-    int time = 0; // time of next unhandled scheduling decision
+    Fraction time = 0; // time of next unhandled scheduling decision
     int missed = -1; // missed job time (-1 if none)
     int cores = 1; // number of CPU cores available
 
@@ -97,7 +98,7 @@ struct SimModel {
 
     // simulates to at least endTime (ignore if endTime <= buffer)
     // handles execBlocks, finding next event, and updating job object bookkeeping 
-    void sim(int endTime);
+    void sim(Fraction endTime);
 };
 
 #endif

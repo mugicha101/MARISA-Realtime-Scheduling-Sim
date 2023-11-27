@@ -1,6 +1,7 @@
 #include "model.h"
 #include <cassert>
 #include <climits>
+#include <iostream>
 
 Job Task::next_job(int task_id) {
     Job job(task_id, next_job_id++, period, next_release, exec_time, next_release + relative_deadline);
@@ -10,11 +11,11 @@ Job Task::next_job(int task_id) {
 
 void Scheduler::init(const TaskSet& task_set) {}
 
-CoreState Scheduler::schedule(const JobSet& active_jobs, int cores, int buffer) {
+CoreState Scheduler::schedule(const JobSet& active_jobs, int cores, Fraction time) {
     return CoreState(cores, -1);
 }
 
-void ExecBlockStorage::add_block(const Job& job, int start, int end) {
+void ExecBlockStorage::add_block(const Job& job, Fraction start, Fraction end) {
     new_blocks.emplace_back(job.task_id, job.job_id, job.core, start, end,
         job.runtime >= job.exec_time ? ExecBlock::COMPLETED : job.deadline <= end ? ExecBlock::MISSED : ExecBlock::PREEMPTED
     );
@@ -36,7 +37,7 @@ ExecBlock ExecBlockStorage::getNext() {
     return block;
 }
 
-void SimModel::sim(int endTime) {
+void SimModel::sim(Fraction endTime) {
     while (missed == -1 && time < endTime) {
         // handle job releases at buffer time
         for (int i = 0; i < task_set.size(); ++i)
@@ -73,7 +74,7 @@ void SimModel::sim(int endTime) {
         }
 
         // find next event
-        int next_event = INT_MAX;
+        Fraction next_event = INT_MAX;
         switch (scheduler->decision_type) {
             case Scheduler::DecisionType::EVENT_BASED:
                 // job release
@@ -90,7 +91,7 @@ void SimModel::sim(int endTime) {
                 next_event = time + 1;
                 break;
         }
-        int delta_time = next_event - time;
+        Fraction delta_time = next_event - time;
 
         // update exec blocks and buffer + handle job deadlines (and misses)
         int j = -1;

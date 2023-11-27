@@ -148,7 +148,7 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
 }
 
 float ExecBlockView::getX() const {
-    return (float)(block.start);
+    return *block.start;
 }
 
 float ExecBlockView::getY(bool task_based) const {
@@ -156,7 +156,7 @@ float ExecBlockView::getY(bool task_based) const {
 }
 
 float ExecBlockView::getWidth() const {
-    return (float)(block.end - block.start);
+    return (float)(*block.end - *block.start);
 }
 
 float ExecBlockView::getHeight() const {

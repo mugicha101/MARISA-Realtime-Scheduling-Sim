@@ -7,25 +7,25 @@
 // global EDF
 struct GEDF : public Scheduler {
     GEDF(bool preemptive) : Scheduler(PriorityScheme::JOB_LEVEL_DYN, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED, DecisionType::EVENT_BASED) {}
-    CoreState schedule(const JobSet& active_jobs, int cores, int time) override;
+    CoreState schedule(const JobSet& active_jobs, int cores, Fraction time) override;
 };
 
 // global RM
 struct GRM : public Scheduler {
     GRM(bool preemptive) : Scheduler(PriorityScheme::STATIC, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED, DecisionType::EVENT_BASED) {}
-    CoreState schedule(const JobSet& active_jobs, int cores, int time) override;
+    CoreState schedule(const JobSet& active_jobs, int cores, Fraction time) override;
 };
 
 // global FIFO
 struct GFIFO : public Scheduler {
     GFIFO() : Scheduler(PriorityScheme::STATIC, MigrationDegree::RESTRICTED, DecisionType::EVENT_BASED) {}
-    CoreState schedule(const JobSet& active_jobs, int cores, int time) override;
+    CoreState schedule(const JobSet& active_jobs, int cores, Fraction time) override;
 };
 
 // testing sheduler (schedules by job id)
 struct TEMP : public Scheduler {
     TEMP(bool preemptive) : Scheduler(PriorityScheme::STATIC, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED, DecisionType::EVENT_BASED) {}
-    CoreState schedule(const JobSet& active_jobs, int cores, int time) override;
+    CoreState schedule(const JobSet& active_jobs, int cores, Fraction time) override;
 };
 
 // partitioned preemptive EDF
@@ -37,7 +37,7 @@ struct PEDF : public Scheduler {
 struct PD2 : public Scheduler {
     bool early_release;
     PD2(bool early_release = true) : Scheduler(PriorityScheme::UNRESTRICTED_DYN, MigrationDegree::FULL, DecisionType::QUANTUM_BASED), early_release(early_release) {}
-    CoreState schedule(const JobSet& active_jobs, int cores, int time) override;
+    CoreState schedule(const JobSet& active_jobs, int cores, Fraction time) override;
 };
 
 #endif
