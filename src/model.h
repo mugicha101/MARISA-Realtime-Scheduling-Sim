@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <deque>
+#include <climits>
 
 struct SimModel;
 
