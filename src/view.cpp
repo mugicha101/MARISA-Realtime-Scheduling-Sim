@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <filesystem>
+#include <unordered_map>
 
 const float BLOCK_SPACING = 10.f;
 const float BLOCK_HEIGHT = 5.f;
@@ -35,7 +36,7 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
 
     // draw background grid
     window.clear(sf::Color(200, 200, 200));
-    float offset = tf.sx() * block_stretch;
+    float offset = tf.sx();
     while (offset < 20.f) offset *= 10.f;
     float grid_pos = (tf * Pos(0.f, 0.f)).x - BLOCK_OUTLINE * 0.5f;
     grid_pos = std::max(grid_pos, std::fmod(std::fmod(grid_pos, offset) + offset, offset));
@@ -69,7 +70,7 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
         int r = task_blocks.size()-1;
         while (l != r) {
             int m = (l + r) >> 1;
-            if ((tf * task_blocks[m].getPos(false, block_stretch)).x + (task_blocks[m].getDim(block_stretch)).x * tf.sx() >= left)
+            if ((tf * task_blocks[m].getPos(false)).x + (task_blocks[m].getDim()).x * tf.sx() >= left)
                 r = m;
             else
                 l = m + 1;
@@ -79,7 +80,7 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
         r = task_blocks.size()-1;
         while (l != r) {
             int m = (l + r + 1) >> 1;
-            if ((tf * task_blocks[m].getPos(false, block_stretch)).x <= right)
+            if ((tf * task_blocks[m].getPos(false)).x <= right)
                 l = m;
             else
                 r = m - 1;
@@ -97,7 +98,7 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
         std::pair<int,int> bounds = taskViewBounds(task_blocks, mouse.pos.x, mouse.pos.x);
         if (bounds.first != bounds.second) continue;
         ExecBlockView& block_view = task_blocks[bounds.first];
-        if (!block_view.mouseTouching(mouse, tf, core_tracks_offset, block_stretch)) continue;
+        if (!block_view.mouseTouching(mouse, tf, core_tracks_offset)) continue;
         hover_tid = tid;
         hover_jid = block_view.block.job_id;
     }
@@ -118,13 +119,13 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
                 focused_block_views.push_back(&block_view);
                 continue;
             }
-            block_view.draw(window, tasks_tf, block_stretch, true, hover_tid == -1);
-            block_view.draw(window, cores_tf, block_stretch, false, hover_tid == -1);
+            block_view.draw(window, tasks_tf, true, hover_tid == -1);
+            block_view.draw(window, cores_tf, false, hover_tid == -1);
         }
     }
     for (ExecBlockView* block_view : focused_block_views) {
-        block_view->draw(window, tasks_tf, block_stretch, true, true);
-        block_view->draw(window, cores_tf, block_stretch, false, true);
+        block_view->draw(window, tasks_tf, true, true);
+        block_view->draw(window, cores_tf, false, true);
     }
 
     // draw ui
@@ -147,6 +148,18 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
     window.display();
 }
 
+void Visualizer::zoom(float sx, float sy, Pos zoom_origin) {
+    Transform stf = Transform::scale(sx, sy);
+    Transform ntf = stf * tf;
+    if (std::max(ntf.sx(), ntf.sy()) > MAX_ZOOM || std::min(ntf.sx(), ntf.sy()) < MIN_ZOOM)
+        return;
+    tf = Transform::trans(zoom_origin.x, zoom_origin.y) * stf * Transform::trans(-zoom_origin.x, -zoom_origin.y) * tf;
+}
+
+void Visualizer::move(float dx, float dy) {
+    tf = Transform::trans(-dx, -dy) * tf;
+}
+
 float ExecBlockView::getX() const {
     return *block.start;
 }
@@ -163,12 +176,12 @@ float ExecBlockView::getHeight() const {
     return (float)BLOCK_HEIGHT;
 }
 
-Pos ExecBlockView::getPos(bool task_based, int block_stretch) const {
-    return {getX() * block_stretch, getY(task_based)};
+Pos ExecBlockView::getPos(bool task_based) const {
+    return {getX(), getY(task_based)};
 }
 
-Pos ExecBlockView::getDim(int block_stretch) const {
-    return {getWidth() * block_stretch, getHeight()};
+Pos ExecBlockView::getDim() const {
+    return {getWidth(), getHeight()};
 }
 
 sf::Color hue(float v, float lighten = 0.f, float scale = 255.f) {
@@ -184,18 +197,18 @@ sf::Color hue(float v, float lighten = 0.f, float scale = 255.f) {
     );
 };
 
-bool ExecBlockView::mouseTouching(const MouseState& mouse, Transform tf, Transform core_tracks_offset, int block_stretch) {
-    task_mr.pos = getPos(true, block_stretch);
-    core_mr.pos = getPos(false, block_stretch);
-    task_mr.dim = core_mr.dim = getDim(block_stretch);
+bool ExecBlockView::mouseTouching(const MouseState& mouse, Transform tf, Transform core_tracks_offset) {
+    task_mr.pos = getPos(true);
+    core_mr.pos = getPos(false);
+    task_mr.dim = core_mr.dim = getDim();
     return task_mr.mouseTouching(mouse, tf) || core_mr.mouseTouching(mouse, tf * core_tracks_offset);
 }
 
-void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based, bool focused) const {
+void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, bool task_based, bool focused) const {
     // draw block
     int fc = focused ? 255 : 128;
-    sf::RectangleShape rect(*(tf.scale() * getDim(block_stretch)));
-    Pos blockPos = tf * getPos(task_based, block_stretch);
+    sf::RectangleShape rect(*(tf.scale() * getDim()));
+    Pos blockPos = tf * getPos(task_based);
     rect.move(*blockPos);
     sf::Color color = hue((task_based ? block.job_id : block.task_id) / 12.f, 0.25f, (float)fc);
     if (std::min(rect.getSize().x, rect.getSize().y) <= BLOCK_OUTLINE * 2.f) {
@@ -244,7 +257,7 @@ void ExecBlockView::draw(sf::RenderWindow& window, Transform tf, int block_stret
             finRect.setFillColor(color);
             finRectDraw(BLOCK_OUTLINE, bar_height);
             finRect.setPosition(base_rect.left + base_rect.width - BLOCK_OUTLINE * 0.5f, base_rect.top - bar_height);
-            finRectDraw(std::min(20.f, 2.f * tf.sx() * block_stretch), BLOCK_OUTLINE);
+            finRectDraw(std::min(20.f, 2.f * tf.sx()), BLOCK_OUTLINE);
         } break;
         case ExecBlock::MISSED: {
 
@@ -315,4 +328,52 @@ sf::Rect<float> MouseRegion::boundingBox(Transform tf) {
 
 bool MouseRegion::mouseTouching(const MouseState& mouse, Transform tf) {
     return boundingBox(tf).contains(*mouse.pos);
+}
+
+int KeyState::tick = 0;
+std::unordered_map<sf::Keyboard::Key, KeyState> KeyState::key_map;
+
+void KeyState::stepTick() {
+    ++tick;
+}
+
+void KeyState::pressKey(sf::Keyboard::Key key) {
+    KeyState& state = key_map[key];
+    state.type_tick = tick;
+    if (state.key_down) return;
+    state.key_down = true;
+    state.update_tick = tick;
+}
+
+void KeyState::releaseKey(sf::Keyboard::Key key) {
+    KeyState& state = key_map[key];
+    if (!state.key_down) return;
+    state.key_down = false;
+    state.update_tick = tick;
+}
+
+void KeyState::reset() {
+    key_map.clear();
+}
+
+bool KeyState::keyPressed(sf::Keyboard::Key key) {
+    return key_map[key].key_down;
+}
+
+bool KeyState::keyReleased(sf::Keyboard::Key key) {
+    return !key_map[key].key_down;
+}
+
+bool KeyState::keyJustPressed(sf::Keyboard::Key key) {
+    KeyState& state = key_map[key];
+    return state.key_down && state.update_tick == tick;
+}
+
+bool KeyState::keyJustReleased(sf::Keyboard::Key key) {
+    KeyState& state = key_map[key];
+    return !state.key_down && state.update_tick == tick;
+}
+
+bool KeyState::keyTyped(sf::Keyboard::Key key) {
+    return key_map[key].type_tick == tick;
 }

@@ -4,10 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <deque>
-
-const float MAX_ZOOM = 10000.f;
-const float MIN_ZOOM = 0.5f;
-const float START_ZOOM = 2.0f;
+#include <algorithm>
 
 int main() {
     Visualizer::init();
@@ -34,6 +31,9 @@ int main() {
     sf::Clock clock;
     std::deque<long long> frame_time_history;
     long long frame_time_sum = 0.f;
+    bool left_pressed = false;
+    bool right_pressed = false;
+    bool down_pressed = false;
     while (view.window.isOpen()) {
         clock.restart();
         float fps = 1000000.f * (float)frame_time_history.size() / (float)frame_time_sum;
@@ -42,24 +42,27 @@ int main() {
         Pos new_mouse_pos = mouse.pos;
         bool mouse_moved = false;
         bool old_mouse_down = mouse.mouse_down;
-        int zoom_action = 0.f;
+        int zoom_action = 0;
+        KeyState::stepTick();
         for (auto event = sf::Event{}; view.window.pollEvent(event);) {
             switch (event.type) {
                 case sf::Event::Closed:
                     view.close();
                     break;
                 case sf::Event::MouseWheelMoved:
-                    if (event.mouseWheel.delta > 0) {
+                    if (event.mouseWheel.delta > 0)
                         zoom_action = 1;
-                    } else if (event.mouseWheel.delta < 0) {
+                    else if (event.mouseWheel.delta < 0)
                         zoom_action = -1;
-                    }
                     break;
                 case sf::Event::LostFocus:
                 case sf::Event::MouseLeft:
                     mouse.mouse_down = false;
                 case sf::Event::GainedFocus:
                     mouse.mouse_lost = true;
+                    left_pressed = false;
+                    right_pressed = false;
+                    KeyState::reset();
                     break;
                 case sf::Event::MouseButtonPressed:
                     if (event.mouseButton.button == sf::Mouse::Left) {
@@ -76,15 +79,11 @@ int main() {
                     new_mouse_pos.y = event.mouseMove.y;
                     break;
                 case sf::Event::KeyPressed:
-                    switch (event.key.code) {
-                        case sf::Keyboard::Right:
-                            if (view.block_stretch < (1 << 20))
-                                view.block_stretch <<= 1;
-                            break;
-                        case sf::Keyboard::Left:
-                            if (view.block_stretch > 1)
-                                view.block_stretch >>= 1;
-                    }
+                    KeyState::pressKey(event.key.code);
+                    break;
+                case sf::Event::KeyReleased:
+                    KeyState::releaseKey(event.key.code);
+                    break;
             }
         }
 
@@ -96,18 +95,42 @@ int main() {
             }
             Pos mouse_pos_change = new_mouse_pos - mouse.pos;
             if (mouse.mouse_down) {
-                view.tf = Transform::trans(mouse_pos_change.x, mouse_pos_change.y) * view.tf;
+                view.move(-mouse_pos_change.x, -mouse_pos_change.y);
             }
             mouse.pos = new_mouse_pos;
         }
-        if (zoom_action) {
-            float zoom_factor = zoom_action == 1 ? 1.25f : 0.8f;
-            if (view.tf.sy() * zoom_factor <= MAX_ZOOM && view.tf.sy() * zoom_factor >= MIN_ZOOM) {
-                Pos sim_pos = mouse.pos;
-                view.tf = Transform::trans(sim_pos.x, sim_pos.y) * Transform::scale(zoom_factor) * Transform::trans(-sim_pos.x, -sim_pos.y) * view.tf;
-            }
-        }
         mouse.just_changed = mouse.mouse_down != old_mouse_down;
+        const float zf_in = 1.02f;
+        const float zf_out = 1.f / zf_in;
+        const float move_amount = 1.f;
+        if (zoom_action == 1)
+            view.zoom(1.25f, 1.25f, mouse.pos);
+        if (zoom_action == -1)
+            view.zoom(0.8f, 0.8f, mouse.pos);
+        if (KeyState::keyPressed(sf::Keyboard::Right))
+            view.zoom(zf_in, 1.f, Pos(view.window.getSize()) * 0.5f);
+        if (KeyState::keyPressed(sf::Keyboard::Left))
+            view.zoom(zf_out, 1.f, Pos(view.window.getSize()) * 0.5f);
+        if (KeyState::keyPressed(sf::Keyboard::Left))
+            view.zoom(zf_out, 1.f, Pos(view.window.getSize()) * 0.5f);
+        if (KeyState::keyPressed(sf::Keyboard::Up) || KeyState::keyPressed(sf::Keyboard::Down)) {
+            Transform ttf = Transform::scale(view.tf.sy(), view.tf.sy()) * view.tf.scale().inv();
+            ttf.sx() = std::clamp(ttf.sx(), 0.8f, 1.25f);
+            view.zoom(ttf.sx(), ttf.sy(), Pos(view.window.getSize()) * 0.5f);
+        }
+        bool stretched = std::abs(view.tf.sx() / view.tf.sy() - 1.f) > 0.00001f;
+        if (KeyState::keyPressed(sf::Keyboard::Up) && !stretched)
+            view.zoom(zf_in, zf_in, Pos(view.window.getSize()) * 0.5f);
+        if (KeyState::keyPressed(sf::Keyboard::Down) && !stretched)
+            view.zoom(zf_out, zf_out, Pos(view.window.getSize()) * 0.5f);
+        if (KeyState::keyPressed(sf::Keyboard::A))
+            view.move(-move_amount, 0);
+        if (KeyState::keyPressed(sf::Keyboard::D))
+            view.move(move_amount, 0);
+        if (KeyState::keyPressed(sf::Keyboard::W))
+            view.move(0, -move_amount);
+        if (KeyState::keyPressed(sf::Keyboard::S))
+            view.move(0, move_amount);
 
         // calc step - update model
         int end_time = (int)std::ceil((view.tf.inv() * Pos(view.window.getSize())).x);

@@ -5,6 +5,11 @@
 #include "model.h"
 #include <utility>
 #include <string>
+#include <unordered_map>
+
+const float MAX_ZOOM = 10000.f;
+const float MIN_ZOOM = 0.5f;
+const float START_ZOOM = 2.0f;
 
 struct Pos {
     float x;
@@ -98,7 +103,7 @@ struct Transform {
         t[1] = (-mat[1]) * detInv;
         t[2] = (mat[1] * mat[5] - mat[2] * mat[4]) * detInv;
         t[3] = -mat[3] * detInv;
-        t[4] = -mat[0] * detInv;
+        t[4] = mat[0] * detInv;
         t[5] = (mat[2] * mat[3] - mat[0] * mat[5]) * detInv;
         return t;
     }
@@ -128,6 +133,24 @@ struct MouseState {
     bool just_changed;
     Pos pos;
     bool mouse_lost;
+};
+
+class KeyState {
+    bool key_down = false;
+    int update_tick = -1;
+    int type_tick = -1;
+    static int tick;
+    static std::unordered_map<sf::Keyboard::Key, KeyState> key_map;
+public:
+    static void pressKey(sf::Keyboard::Key key);
+    static void releaseKey(sf::Keyboard::Key key);
+    static void reset();
+    static void stepTick();
+    static bool keyPressed(sf::Keyboard::Key key); // returns whether key currently pressed
+    static bool keyReleased(sf::Keyboard::Key key); // returns whether key currently not pressed
+    static bool keyJustPressed(sf::Keyboard::Key key); // returns whether key just switched from unpressed to pressed
+    static bool keyJustReleased(sf::Keyboard::Key key); // returns whether key just switched from pressed to unpressed
+    static bool keyTyped(sf::Keyboard::Key key); // returns whether key just recieved key press event (repeats when key held)
 };
 
 struct MouseRegion {
@@ -177,10 +200,10 @@ struct ExecBlockView {
     float getY(bool task_based) const;
     float getWidth() const;
     float getHeight() const;
-    Pos getPos(bool task_based, int block_stretch) const;
-    Pos getDim(int block_stretch) const;
-    bool mouseTouching(const MouseState& mouse, Transform tf, Transform core_tracks_offset, int block_stretch); // return true if mouse hovered over
-    void draw(sf::RenderWindow& window, Transform tf, int block_stretch, bool task_based, bool focused) const;
+    Pos getPos(bool task_based) const;
+    Pos getDim() const;
+    bool mouseTouching(const MouseState& mouse, Transform tf, Transform core_tracks_offset); // return true if mouse hovered over
+    void draw(sf::RenderWindow& window, Transform tf, bool task_based, bool focused) const;
 };
 
 struct Visualizer {
@@ -188,9 +211,8 @@ struct Visualizer {
     static void init();
     
     sf::RenderWindow window;
-    Transform tf;
+    Transform tf = Transform::scale(START_ZOOM, START_ZOOM);
     std::vector<std::vector<ExecBlockView>> blocks;
-    int block_stretch = 1;
 
     std::vector<TaskEditor> task_editors;
 
@@ -204,6 +226,12 @@ struct Visualizer {
 
     // returns true if window open false otherwise
     bool isOpen();
+
+    // handle zoom
+    void zoom(float sx, float sy, Pos zoom_origin);
+
+    // handle movement
+    void move(float dx, float dy);
 
     // updates display
     void update(SimModel& model, const MouseState& mouse, float fps);
