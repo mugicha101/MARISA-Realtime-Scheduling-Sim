@@ -19,10 +19,10 @@ int main() {
     tset.push_back(Task(20, 8));
     tset.push_back(Task(10, 8));
     tset.push_back(Task(20, 11));
-    tset.push_back(Task(Fraction(11,12), Fraction(2,9)));
-    Scheduler* scheduler = new GEDF(true);
+    // tset.push_back(Task(Fraction(11,12), Fraction(2,9)));
+    Scheduler* scheduler = new LLREF();
     scheduler->init(tset);
-    model.reset(tset, scheduler, 5);
+    model.reset(tset, scheduler, 3);
 
     Visualizer view;
     view.tf = Transform::scale(START_ZOOM) * Transform::id();

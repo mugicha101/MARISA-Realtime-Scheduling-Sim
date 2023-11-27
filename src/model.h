@@ -6,14 +6,17 @@
 #include <memory>
 #include <deque>
 
+struct SimModel;
+
 struct Job {
+    long long uid;
     int task_id;
     int job_id;
     Fraction period, release_time, exec_time, deadline; // basic job/task stats
     Fraction runtime = 0; // time job has executed for
     int core = -1; // core the job was last on (or currently on if running) (-1 if not executed yet)
     bool running = false; // true if the job is currently running
-    Job(int task_id = -1, int job_id = -1, Fraction period = 0, Fraction release_time = 0, Fraction exec_time = 0, Fraction deadline = 0) : task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
+    Job(int task_id = -1, int job_id = -1, Fraction period = 0, Fraction release_time = 0, Fraction exec_time = 0, Fraction deadline = 0) : uid((((long long)task_id) << 32) | job_id), task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
 };
 
 struct Task {
@@ -32,6 +35,12 @@ struct Task {
 typedef std::vector<Task> TaskSet; // task_set[i] = task with task id i
 typedef std::vector<Job> JobSet; // job_set[i] = job with job id i
 typedef std::vector<int> CoreState; // core_state[i] = job id of job scheduled on core i (-1 if idle)
+
+struct ScheduleDecision {
+    Fraction next_event = INT_MAX;
+    CoreState core_state;
+    ScheduleDecision(int cores) : core_state(CoreState(cores, -1)) {}
+};
 
 struct ExecBlock {
     enum EndState {PREEMPTED, COMPLETED, MISSED};
@@ -66,17 +75,15 @@ public:
 struct Scheduler {
     enum PriorityScheme { STATIC, JOB_LEVEL_DYN, UNRESTRICTED_DYN };
     enum MigrationDegree { PARTITIONED, RESTRICTED, FULL};
-    enum DecisionType { EVENT_BASED, QUANTUM_BASED };
 
     const PriorityScheme priority_scheme;
     const MigrationDegree migration_degree;
-    const DecisionType decision_type;
-    Scheduler(PriorityScheme priority_scheme, MigrationDegree migration_degree, DecisionType decision_type) : priority_scheme(priority_scheme), migration_degree(migration_degree), decision_type(decision_type) {}
+    Scheduler(PriorityScheme priority_scheme, MigrationDegree migration_degree) : priority_scheme(priority_scheme), migration_degree(migration_degree) {}
 
     virtual void init(const TaskSet& task_set);
 
     // assign jobs to cores
-    virtual CoreState schedule(const JobSet& active_jobs, int cores, Fraction time);
+    virtual ScheduleDecision schedule(const SimModel& model);
 };
 
 struct SimModel {

@@ -11,8 +11,8 @@ Job Task::next_job(int task_id) {
 
 void Scheduler::init(const TaskSet& task_set) {}
 
-CoreState Scheduler::schedule(const JobSet& active_jobs, int cores, Fraction time) {
-    return CoreState(cores, -1);
+ScheduleDecision Scheduler::schedule(const SimModel& model) {
+    return ScheduleDecision(model.cores);
 }
 
 void ExecBlockStorage::add_block(const Job& job, Fraction start, Fraction end) {
@@ -62,55 +62,37 @@ void SimModel::sim(Fraction endTime) {
         swap(sorted_jobs, active_jobs);
 
         // schedule
-        CoreState core_state = scheduler->schedule(active_jobs, cores, time);
-        assert(core_state.size() == cores);
+        ScheduleDecision sd = scheduler->schedule(*this);
+        assert(sd.core_state.size() == cores);
         for (int i = 0; i < active_jobs.size(); ++i)
             active_jobs[i].running = false;
-        for (int i = 0; i < core_state.size(); ++i) {
-            if (core_state[i] != -1) {
-                active_jobs[core_state[i]].core = i;
-                active_jobs[core_state[i]].running = true;
+        for (int i = 0; i < sd.core_state.size(); ++i) {
+            if (sd.core_state[i] != -1) {
+                active_jobs[sd.core_state[i]].core = i;
+                active_jobs[sd.core_state[i]].running = true;
             }
         }
-
-        // find next event
-        Fraction next_event = INT_MAX;
-        switch (scheduler->decision_type) {
-            case Scheduler::DecisionType::EVENT_BASED:
-                // job release
-                for (Task& task : task_set)
-                    next_event = std::min(next_event, task.next_release);
-                // job deadline or completion
-                for (Job& job : active_jobs) {
-                    next_event = std::min(next_event, job.deadline);
-                    if (job.core != -1)
-                        next_event = std::min(next_event, time + job.exec_time - job.runtime);
-                }
-                break;
-            case Scheduler::DecisionType::QUANTUM_BASED:
-                next_event = time + 1;
-                break;
-        }
-        Fraction delta_time = next_event - time;
+        Fraction delta_time = sd.next_event - time;
 
         // update exec blocks and buffer + handle job deadlines (and misses)
         int j = -1;
         for (int i = 0; i < active_jobs.size(); ++i) {
             Job& job = active_jobs[i];
             if (job.running) {
-                job.runtime += delta_time;
-                ebs.add_block(job, time, next_event);
+                Fraction block_runtime = std::min(job.exec_time - job.runtime, delta_time);
+                job.runtime += block_runtime;
+                ebs.add_block(job, time, time + block_runtime);
+                if (job.runtime == job.exec_time) {
+                    finished_jobs.push_back(job);
+                    continue;
+                }
             }
-            if (job.runtime == job.exec_time) {
-                finished_jobs.push_back(job);
-                continue;
-            }
-            if (job.deadline == next_event)
+            if (job.deadline <= sd.next_event)
                 missed = i;
             active_jobs[++j] = job;
         }
         active_jobs.resize(j+1);
-        time = next_event;
+        time = sd.next_event;
     }
 }
 
