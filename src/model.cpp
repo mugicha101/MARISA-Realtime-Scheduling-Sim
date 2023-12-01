@@ -4,7 +4,7 @@
 #include <iostream>
 
 Job Task::next_job(int task_id) {
-    Job job(task_id, next_job_id++, period, next_release, exec_time, next_release + relative_deadline);
+    Job job(this, task_id, next_job_id++, next_release, exec_time, next_release + relative_deadline);
     next_release += period;
     return job;
 }

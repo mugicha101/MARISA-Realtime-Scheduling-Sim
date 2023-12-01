@@ -17,7 +17,7 @@ int main() {
     tset.push_back(Task(10, 8));
     tset.push_back(Task(20, 11));
     // tset.push_back(Task(Fraction(11,12), Fraction(2,9)));
-    Scheduler* scheduler = new LLREF();
+    Scheduler* scheduler = new EDZL();
     scheduler->init(tset);
     model.reset(tset, scheduler, 3);
 
@@ -109,8 +109,6 @@ int main() {
             view.zoom(0.8f, 0.8f, mouse.pos);
         if (KeyState::keyPressed(sf::Keyboard::Right))
             view.zoom(zf_in, 1.f, Pos(view.window.getSize()) * 0.5f);
-        if (KeyState::keyPressed(sf::Keyboard::Left))
-            view.zoom(zf_out, 1.f, Pos(view.window.getSize()) * 0.5f);
         if (KeyState::keyPressed(sf::Keyboard::Left))
             view.zoom(zf_out, 1.f, Pos(view.window.getSize()) * 0.5f);
         if (KeyState::keyPressed(sf::Keyboard::Up) || KeyState::keyPressed(sf::Keyboard::Down)) {

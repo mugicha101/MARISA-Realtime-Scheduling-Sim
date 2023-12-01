@@ -8,16 +8,18 @@
 #include <climits>
 
 struct SimModel;
+struct Task;
 
 struct Job {
     long long uid;
     int task_id;
     int job_id;
-    Fraction period, release_time, exec_time, deadline; // basic job/task stats
+    Fraction release_time, exec_time, deadline; // basic job/task stats
+    const Task* source_task; // source task pointer
     Fraction runtime = 0; // time job has executed for
     int core = -1; // core the job was last on (or currently on if running) (-1 if not executed yet)
     bool running = false; // true if the job is currently running
-    Job(int task_id = -1, int job_id = -1, Fraction period = 0, Fraction release_time = 0, Fraction exec_time = 0, Fraction deadline = 0) : uid((((long long)task_id) << 32) | job_id), task_id(task_id), job_id(job_id), period(period), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
+    Job(const Task* source_task = nullptr, int task_id = -1, int job_id = -1, Fraction release_time = 0, Fraction exec_time = 0, Fraction deadline = 0) : source_task(source_task), uid((((long long)task_id) << 32) | job_id), task_id(task_id), job_id(job_id), release_time(release_time), exec_time(exec_time), deadline(deadline) {}
 };
 
 struct Task {

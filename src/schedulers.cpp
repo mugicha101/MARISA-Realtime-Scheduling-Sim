@@ -85,10 +85,17 @@ Fraction nextJobCompletion(const JobSet& active_jobs, const CoreState& core_stat
     return next_completion;
 }
 
-ScheduleDecision GRM::schedule(const SimModel& model) {
+bool usesIntegerTime(const TaskSet& task_set) {
+    for (const Task& task : task_set)
+        if (!task.phase.isInt() || !task.period.isInt() || !task.exec_time.isInt() || !task.relative_deadline.isInt())
+            return false;
+    return true;
+};
+
+ScheduleDecision GDM::schedule(const SimModel& model) {
     ScheduleDecision sd(model.cores);
     auto priority_func = [](const Job& job) {
-        return -job.period;
+        return -std::min(job.source_task->period, job.source_task->relative_deadline);
     };
     assignToCores(model.active_jobs, sd.core_state, chooseByPriority<Fraction>(model.active_jobs, model.cores, INT_MIN, priority_func));
     sd.next_event = std::min(nextSchedEvent(model.task_set, model.active_jobs, model.time), nextJobCompletion(model.active_jobs, sd.core_state, model.time));
@@ -105,6 +112,21 @@ ScheduleDecision GEDF::schedule(const SimModel& model) {
     return sd;
 }
 
+void GLLF::init(const TaskSet& task_set) {
+    valid_task_set = usesIntegerTime(task_set);
+}
+
+ScheduleDecision GLLF::schedule(const SimModel& model) {
+    ScheduleDecision sd(model.cores);
+    if (!valid_task_set) return sd; // don't schedule if tasks don't use integer time
+    auto priority_func = [](const Job& job) {
+        return -(job.deadline - (job.exec_time - job.runtime));
+    };
+    assignToCores(model.active_jobs, sd.core_state, chooseByPriority<Fraction>(model.active_jobs, model.cores, INT_MIN, priority_func));
+    sd.next_event = model.time + 1;
+    return sd;
+}
+
 ScheduleDecision GFIFO::schedule(const SimModel& model) {
     ScheduleDecision sd(model.cores);
     auto priority_func = [](const Job& job) {
@@ -115,14 +137,34 @@ ScheduleDecision GFIFO::schedule(const SimModel& model) {
     return sd;
 }
 
+ScheduleDecision EDZL::schedule(const SimModel& model) {
+    ScheduleDecision sd(model.cores);
+    auto priority_func = [&time = model.time](const Job& job) {
+        return job.deadline - time == job.exec_time - job.runtime ? Fraction(INT_MAX) : -job.deadline;
+    };
+    assignToCores(model.active_jobs, sd.core_state, chooseByPriority<Fraction>(model.active_jobs, model.cores, INT_MIN, priority_func));
+    sd.next_event = std::min(nextSchedEvent(model.task_set, model.active_jobs, model.time), nextJobCompletion(model.active_jobs, sd.core_state, model.time));
+    std::vector<bool> scheduled(model.active_jobs.size(), false);
+    for (int i : sd.core_state) {
+        if (i == -1) continue;
+        scheduled[i] = true;
+    }
+    for (int i = 0; i < model.active_jobs.size(); ++i) {
+        if (scheduled[i]) continue;
+        const Job& job = model.active_jobs[i];
+        sd.next_event = std::min(sd.next_event, job.deadline - (job.exec_time - job.runtime));
+    }
+    return sd;
+}
+
+void PD2::init(const TaskSet& task_set) {
+    valid_task_set = usesIntegerTime(task_set);
+}
+
 ScheduleDecision PD2::schedule(const SimModel& model) {
     ScheduleDecision sd(model.cores);
-    // don't schedule if jobs don't use integer time
-    for (const Job& job : model.active_jobs) {
-        if (!job.exec_time.isInt() || !job.deadline.isInt() || !job.period.isInt() || !job.release_time.isInt() || !job.runtime.isInt())
-            return sd;
-    }
-    auto priority_func = [early_release = this->early_release, time = model.time](const Job& job) {
+    if (!valid_task_set) return sd; // don't schedule if tasks don't use integer time
+    auto priority_func = [early_release = this->early_release, &time = model.time](const Job& job) {
         auto get_itv = [&job](int work_done) {
             int rel_deadline = job.deadline.getNum() - job.release_time.getNum();
             return std::make_pair(
