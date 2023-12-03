@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <unordered_map>
-#include "model.h"
+#include "../model.h"
+#include "helper_funcs.h"
 
 // Global Eearliest Deadline First
 struct GEDF : public Scheduler {
