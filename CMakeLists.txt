@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(CMakeSFMLProject LANGUAGES CXX)
+set (CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
@@ -10,7 +11,7 @@ FetchContent_Declare(SFML
     GIT_TAG 2.6.x)
 FetchContent_MakeAvailable(SFML)
 
-file(GLOB src CONFIGURE_DEPENDS "src/*.h" "src/*.cpp" "src/linux_sched/*.c" "src/linux_sched/rbtree_deps/*.h")
+file(GLOB src CONFIGURE_DEPENDS "src/*.h" "src/*.cpp" "src/schedulers/*.h" "src/schedulers/*.cpp")
 add_executable(CMakeSFMLProject ${src})
 target_link_libraries(CMakeSFMLProject PRIVATE sfml-graphics)
 target_compile_features(CMakeSFMLProject PRIVATE cxx_std_17)

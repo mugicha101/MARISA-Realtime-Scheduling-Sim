@@ -1,6 +1,7 @@
 #include "model.h"
 #include "view.h"
-#include "schedulers.h"
+#include "schedulers/schedulers.h"
+#include "taskgen.h"
 #include <iostream>
 #include <cmath>
 #include <deque>
@@ -20,6 +21,52 @@ int main() {
     Scheduler* scheduler = new EDZL();
     scheduler->init(tset);
     model.reset(tset, scheduler, 3);
+
+    const int TASK_COUNT = 5;
+    const int PRECISION = 100;
+    const int PERIOD = 100;
+    const int TRIALS = 1000000;
+    std::vector<std::vector<int>> util_buckets(TASK_COUNT, std::vector<int>(PRECISION + 1, 0));
+    std::vector<int> std_buckets(PRECISION + 1, 0);
+    for (int t = 0; t < TRIALS; ++t) {
+        TaskSet task_set = TaskSetGenerator::genUUniFastDiscard(PRECISION, 1, TASK_COUNT, 1, 1);
+        float mean = 0.f;
+        std::vector<Fraction> utils(TASK_COUNT);
+        for (int i = 0; i < TASK_COUNT; ++i) {
+            Task& task = task_set[i];
+            utils[i] = task.exec_time / task.period;
+            mean += *utils[i];
+        }
+        mean /= TASK_COUNT;
+        float std = 0;
+        for (int i = 0; i < TASK_COUNT; ++i) {
+            int ub = utils[i].getNum() * PRECISION / utils[i].getDen();
+            std += std::abs(*utils[i] - mean);
+            ++util_buckets[i][ub];
+        }
+        int sb = std * 25;
+        if (sb < std_buckets.size())
+            ++std_buckets[sb];
+    }
+    int max_val = 0;
+    for (int i = 0; i < TASK_COUNT; ++i)
+        max_val = std::max(max_val, *std::max_element(util_buckets[i].begin(), util_buckets[i].end()));
+    for (int i = 0; i < TASK_COUNT; ++i) {
+        std::cout << "TASK " << i << " UTIL DISTRIBUTION" << std::endl;
+        for (int u = 0; u <= PRECISION; ++u) {
+            int bar = std::round(100.f * util_buckets[i][u] / max_val);
+            std::cout << std::string(bar, 'X') << std::string(100 - bar, ' ') << util_buckets[i][u] << std::endl;
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "STD DISTRIBUION " << std::endl;
+    max_val = *std::max_element(std_buckets.begin(), std_buckets.end());
+    for (int u = 0; u <= PRECISION; ++u) {
+        int bar = std::round(100.f * std_buckets[u] / max_val);
+        std::cout << std::string(bar, 'X') << std::string(100 - bar, ' ') << std_buckets[u] << std::endl;
+    }
+    std::cout << std::endl;
+    return 0;
 
     Visualizer view;
     view.tf = Transform::scale(START_ZOOM) * Transform::id();
