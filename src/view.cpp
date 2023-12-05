@@ -130,8 +130,27 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
 
     // draw ui
     task_editors.resize(model.task_set.size());
+    task_labels.resize(model.task_set.size());
     for (int tid = 0; tid < model.task_set.size(); ++tid) {
+        Task& task = model.task_set[tid];
         task_editors[tid].draw(window, tf, model.task_set[tid], tid);
+        auto frac_str = [](Fraction frac) {
+            return frac.isInt() ? std::to_string(frac.getNum()) : std::to_string(frac.getNum()) + "/" + std::to_string(frac.getDen());
+        };
+        std::string task_label = "task " + std::to_string(tid)
+                                + ": (" + frac_str(task.phase) + ","
+                                + frac_str(task.period) + ","
+                                + frac_str(task.exec_time) + ","
+                                + frac_str(task.relative_deadline) + ")";
+        task_labels[tid] = TextBox(Pos(-55, tid * BLOCK_SPACING + 0.5f), Pos(50, BLOCK_SPACING - 0.5f), 2.5f, task_label, true);
+        task_labels[tid].draw(window, tasks_tf * Transform::scale(tasks_tf.sx() / tasks_tf.sy(), 1).inv());
+    }
+
+    core_labels.resize(model.cores);
+    for (int i = 0; i < model.cores; ++i) {
+        std::string core_label = "core " + std::to_string(i);
+        task_labels[i] = TextBox(Pos(-55, i * BLOCK_SPACING + 0.5f), Pos(50, BLOCK_SPACING - 0.5f), 2.5f, core_label, true);
+        task_labels[i].draw(window, cores_tf * Transform::scale(cores_tf.sx() / cores_tf.sy(), 1).inv());
     }
 
     // draw debug
@@ -318,7 +337,7 @@ void TextBox::draw(sf::RenderWindow& window, Transform tf) {
 void TaskEditor::draw(sf::RenderWindow& window, Transform tf, Task& task, int tid) {
     std::vector<TextBox*> tb_arr = {&tb_phase, &tb_period, &tb_exec, &tb_deadline};
     tb_phase = TextBox(Pos(0, tid * BLOCK_SPACING), Pos(10, 5), 3.f, "test", true);
-    tb_phase.draw(window, tf);
+    // tb_phase.draw(window, tf);
     tb_period = TextBox(Pos(0, tid * BLOCK_SPACING), Pos(10, 5), 3.f, "test", true);
 }
 
