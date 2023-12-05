@@ -4,6 +4,7 @@
 #include <iostream>
 #include <filesystem>
 #include <unordered_map>
+#include <string>
 
 const float BLOCK_SPACING = 10.f;
 const float BLOCK_HEIGHT = 5.f;
