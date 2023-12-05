@@ -215,6 +215,8 @@ struct Visualizer {
     std::vector<std::vector<ExecBlockView>> blocks;
 
     std::vector<TaskEditor> task_editors;
+    std::vector<TextBox> task_labels;
+    std::vector<TextBox> core_labels;
 
     Visualizer() {}
 

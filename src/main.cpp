@@ -17,14 +17,9 @@ int main() {
     Visualizer::init();
     SimModel model;
     // setup test model
-    Scheduler* scheduler = new PD2(true);
-    TaskSet task_set = TaskSetGenerator::genModifiedKraemer(10, Fraction(38,20), 12, 4, 12);
-    for (Task& task : task_set) {
-        task.exec_time = (task.exec_time * 10).ceil();
-        task.period = task.period * 10;
-        task.relative_deadline = task.period;
-    }
-    model.reset(task_set, scheduler, 2);
+    Scheduler* scheduler = new LLREF();
+    TaskSet task_set = TaskSetGenerator::genModifiedKraemer(10, 4, 12, 4, 12);
+    model.reset(task_set, scheduler, 4);
 
     Visualizer view;
     view.tf = Transform::scale(START_ZOOM) * Transform::id();
@@ -107,7 +102,7 @@ int main() {
         mouse.just_changed = mouse.mouse_down != old_mouse_down;
         const float zf_in = 1.02f;
         const float zf_out = 1.f / zf_in;
-        const float move_amount = 1.f;
+        const float move_amount = 5.f;
         if (zoom_action == 1)
             view.zoom(1.25f, 1.25f, mouse.pos);
         if (zoom_action == -1)

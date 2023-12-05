@@ -8,21 +8,21 @@
 
 // Global Eearliest Deadline First
 struct GEDF : public Scheduler {
-    GEDF(bool preemptive) : Scheduler(PriorityScheme::JOB_LEVEL_DYN, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED) {}
+    GEDF() : Scheduler(PriorityScheme::JOB_LEVEL_DYN, MigrationDegree::FULL) {}
     ScheduleDecision schedule(const SimModel& model) override;
 };
 
 // Global LLF on Discrete Time
 struct GLLF : public Scheduler {
     bool valid_task_set = false;
-    GLLF(bool preemptive) : Scheduler(PriorityScheme::JOB_LEVEL_DYN, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED) {}
+    GLLF() : Scheduler(PriorityScheme::JOB_LEVEL_DYN, MigrationDegree::FULL) {}
     ScheduleDecision schedule(const SimModel& model) override;
     void init(const TaskSet& task_set) override;
 };
 
 // Global Deadline Monotonic (Rate Monotonic if implicit deadlines used)
 struct GDM : public Scheduler {
-    GDM(bool preemptive) : Scheduler(PriorityScheme::STATIC, preemptive ? MigrationDegree::FULL : MigrationDegree::RESTRICTED) {}
+    GDM() : Scheduler(PriorityScheme::STATIC, MigrationDegree::FULL) {}
     ScheduleDecision schedule(const SimModel& model) override;
 };
 

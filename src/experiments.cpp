@@ -54,7 +54,7 @@ public:
         std::string scheduler_names[SCHED_COUNT];
         Fraction sched_check_util[SCHED_COUNT];
 
-        schedulers[0] = new GEDF(true);
+        schedulers[0] = new GEDF();
         scheduler_names[0] = "GEDF";
         sched_check_util[0] = Fraction(0,2) * cores;
 
