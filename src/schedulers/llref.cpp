@@ -41,6 +41,6 @@ ScheduleDecision LLREF::schedule(const SimModel& model) {
 
     // update local exec times
     for (int i : sd.core_state)
-        local_exec[model.active_jobs[i].uid] -= sd.next_event - model.time;
+        if (i != -1) local_exec[model.active_jobs[i].uid] -= sd.next_event - model.time;
     return sd;
 }

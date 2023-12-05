@@ -2,6 +2,7 @@
 #include <cassert>
 #include <climits>
 #include <iostream>
+#include <algorithm>
 
 Job Task::next_job(int task_id) {
     Job job(this, task_id, next_job_id++, next_release, exec_time, next_release + relative_deadline);
@@ -38,11 +39,29 @@ ExecBlock ExecBlockStorage::getNext() {
 }
 
 void SimModel::sim(Fraction endTime) {
+    CoreState core_state(cores, -1);
+    for (int i = 0; i < active_jobs.size(); ++i)
+        if (active_jobs[i].running)
+            core_state[active_jobs[i].core] = i;
+    std::vector<bool> was_running;
+    std::vector<std::pair<Fraction,int>> next_release;
+    next_release.reserve(task_set.size());
+    for (int i = 0; i < task_set.size(); ++i)
+        next_release.emplace_back(task_set[i].next_release, i);
+    auto heap_cmp = [](std::pair<Fraction, int>& a, std::pair<Fraction, int>& b) {
+        return a.first > b.first;
+    };
+    std::make_heap(next_release.begin(), next_release.end(), heap_cmp);
+    int cycles = 0;
     while (missed == -1 && time < endTime) {
-        // handle job releases at buffer time
-        for (int i = 0; i < task_set.size(); ++i)
-            if (task_set[i].next_release == time)
-                active_jobs.push_back(task_set[i].next_job(i));
+        // handle job releases by time
+        while (next_release.front().first <= time) {
+            std::pop_heap(next_release.begin(), next_release.end(), heap_cmp);
+            int tid = next_release.back().second;
+            active_jobs.push_back(task_set[tid].next_job(tid));
+            next_release.back().first = task_set[tid].next_release;
+            std::push_heap(next_release.begin(), next_release.end(), heap_cmp);
+        }
 
         // sort jobs by executing first then preemptive then fresh
         int next_executing = 0;
@@ -64,28 +83,36 @@ void SimModel::sim(Fraction endTime) {
         // schedule
         ScheduleDecision sd = scheduler->schedule(*this);
         assert(sd.core_state.size() == cores);
-        for (int i = 0; i < active_jobs.size(); ++i)
+        was_running.resize(active_jobs.size());
+        for (int i = 0; i < active_jobs.size(); ++i) {
+            was_running[i] = active_jobs[i].running;
             active_jobs[i].running = false;
+        }
         for (int i = 0; i < sd.core_state.size(); ++i) {
+            cswitch_count += core_state[i] != sd.core_state[i];
+            Job& job = active_jobs[sd.core_state[i]];
             if (sd.core_state[i] != -1) {
-                active_jobs[sd.core_state[i]].core = i;
-                active_jobs[sd.core_state[i]].running = true;
+                if (job.core != -1 && job.core != i) ++job.migration_count;
+                job.core = i;
+                job.running = true;
             }
         }
         Fraction delta_time = sd.next_event - time;
+        assert(delta_time > 0);
 
-        // update exec blocks and buffer + handle job deadlines (and misses)
+        // update exec blocks and buffer + handle job deadlines (and misses) + handle preemption counting
         int j = -1;
         for (int i = 0; i < active_jobs.size(); ++i) {
             Job& job = active_jobs[i];
             if (job.running) {
                 Fraction block_runtime = std::min(job.exec_time - job.runtime, delta_time);
                 job.runtime += block_runtime;
-                ebs.add_block(job, time, time + block_runtime);
+                if (ebs_active)
+                    ebs.add_block(job, time, time + block_runtime);
                 if (job.runtime == job.exec_time) {
                     finished_jobs.push_back(job);
                     continue;
-                }
+                } else job.preempt_count += !was_running[i];
             }
             if (job.deadline <= sd.next_event)
                 missed = i;
@@ -99,9 +126,11 @@ void SimModel::sim(Fraction endTime) {
 void SimModel::reset(TaskSet task_set, Scheduler* scheduler, int cores) {
     this->task_set = task_set;
     this->scheduler = scheduler;
+    scheduler->init(task_set);
     this->cores = cores;
     time = 0;
     missed = -1;
+    cswitch_count = 0;
     active_jobs.clear();
     finished_jobs.clear();
 }

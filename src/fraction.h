@@ -24,6 +24,14 @@ public:
         return den == 1;
     }
 
+    long long floor() const {
+        return num / den; 
+    }
+
+    long long ceil() const {
+        return (num + den - 1) / den;
+    }
+
     long long getNum() const {
         return num;
     }

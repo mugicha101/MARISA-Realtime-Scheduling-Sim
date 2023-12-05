@@ -15,7 +15,8 @@ ScheduleDecision EDZL::schedule(const SimModel& model) {
     for (int i = 0; i < model.active_jobs.size(); ++i) {
         if (scheduled[i]) continue;
         const Job& job = model.active_jobs[i];
-        sd.next_event = std::min(sd.next_event, job.deadline - (job.exec_time - job.runtime));
+        Fraction event = job.deadline - (job.exec_time - job.runtime);
+        if (event > model.time) sd.next_event = std::min(sd.next_event, event);
     }
     return sd;
 }

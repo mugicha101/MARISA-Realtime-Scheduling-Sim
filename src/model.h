@@ -15,6 +15,8 @@ struct Job {
     int task_id;
     int job_id;
     Fraction release_time, exec_time, deadline; // basic job/task stats
+    int preempt_count = 0;
+    int migration_count = 0;
     const Task* source_task; // source task pointer
     Fraction runtime = 0; // time job has executed for
     int core = -1; // core the job was last on (or currently on if running) (-1 if not executed yet)
@@ -93,10 +95,13 @@ struct SimModel {
     TaskSet task_set;
     Scheduler* scheduler = nullptr;
     ExecBlockStorage ebs;
+    bool ebs_active = true;
 
     Fraction time = 0; // time of next unhandled scheduling decision
     int missed = -1; // missed job time (-1 if none)
     int cores = 1; // number of CPU cores available
+
+    long long cswitch_count = 0; // number of context switches
 
     JobSet active_jobs;
     JobSet finished_jobs;

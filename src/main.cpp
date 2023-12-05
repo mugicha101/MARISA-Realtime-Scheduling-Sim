@@ -2,71 +2,29 @@
 #include "view.h"
 #include "schedulers/schedulers.h"
 #include "taskgen.h"
+#include "experiments.cpp"
 #include <iostream>
 #include <cmath>
 #include <deque>
 #include <algorithm>
 
 int main() {
+    Experiment::kraemer();
+    // Experiment::sched(2);
+    // Experiment::sched(4);
+    // Experiment::sched(8);
+
     Visualizer::init();
     SimModel model;
     // setup test model
-    TaskSet tset;
-    tset.push_back(Task(20, 15));
-    tset.push_back(Task(10, 5));
-    tset.push_back(Task(20, 8));
-    tset.push_back(Task(10, 8));
-    tset.push_back(Task(20, 11));
-    // tset.push_back(Task(Fraction(11,12), Fraction(2,9)));
-    Scheduler* scheduler = new EDZL();
-    scheduler->init(tset);
-    model.reset(tset, scheduler, 3);
-
-    const int TASK_COUNT = 5;
-    const int PRECISION = 100;
-    const int PERIOD = 100;
-    const int TRIALS = 1000000;
-    std::vector<std::vector<int>> util_buckets(TASK_COUNT, std::vector<int>(PRECISION + 1, 0));
-    std::vector<int> std_buckets(PRECISION + 1, 0);
-    for (int t = 0; t < TRIALS; ++t) {
-        TaskSet task_set = TaskSetGenerator::genUUniFastDiscard(PRECISION, 1, TASK_COUNT, 1, 1);
-        float mean = 0.f;
-        std::vector<Fraction> utils(TASK_COUNT);
-        for (int i = 0; i < TASK_COUNT; ++i) {
-            Task& task = task_set[i];
-            utils[i] = task.exec_time / task.period;
-            mean += *utils[i];
-        }
-        mean /= TASK_COUNT;
-        float std = 0;
-        for (int i = 0; i < TASK_COUNT; ++i) {
-            int ub = utils[i].getNum() * PRECISION / utils[i].getDen();
-            std += std::abs(*utils[i] - mean);
-            ++util_buckets[i][ub];
-        }
-        int sb = std * 25;
-        if (sb < std_buckets.size())
-            ++std_buckets[sb];
+    Scheduler* scheduler = new PD2(true);
+    TaskSet task_set = TaskSetGenerator::genModifiedKraemer(10, Fraction(38,20), 12, 4, 12);
+    for (Task& task : task_set) {
+        task.exec_time = (task.exec_time * 10).ceil();
+        task.period = task.period * 10;
+        task.relative_deadline = task.period;
     }
-    int max_val = 0;
-    for (int i = 0; i < TASK_COUNT; ++i)
-        max_val = std::max(max_val, *std::max_element(util_buckets[i].begin(), util_buckets[i].end()));
-    for (int i = 0; i < TASK_COUNT; ++i) {
-        std::cout << "TASK " << i << " UTIL DISTRIBUTION" << std::endl;
-        for (int u = 0; u <= PRECISION; ++u) {
-            int bar = std::round(100.f * util_buckets[i][u] / max_val);
-            std::cout << std::string(bar, 'X') << std::string(100 - bar, ' ') << util_buckets[i][u] << std::endl;
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "STD DISTRIBUION " << std::endl;
-    max_val = *std::max_element(std_buckets.begin(), std_buckets.end());
-    for (int u = 0; u <= PRECISION; ++u) {
-        int bar = std::round(100.f * std_buckets[u] / max_val);
-        std::cout << std::string(bar, 'X') << std::string(100 - bar, ' ') << std_buckets[u] << std::endl;
-    }
-    std::cout << std::endl;
-    return 0;
+    model.reset(task_set, scheduler, 2);
 
     Visualizer view;
     view.tf = Transform::scale(START_ZOOM) * Transform::id();
@@ -176,6 +134,9 @@ int main() {
             view.move(0, -move_amount);
         if (KeyState::keyPressed(sf::Keyboard::S))
             view.move(0, move_amount);
+
+        if (KeyState::keyPressed(sf::Keyboard::X))
+            std::cout << model.cswitch_count << std::endl;
 
         // calc step - update model
         int end_time = (int)std::ceil((view.tf.inv() * Pos(view.window.getSize())).x);

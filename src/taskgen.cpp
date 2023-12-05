@@ -8,22 +8,19 @@
 
 std::default_random_engine TaskSetGenerator::gen;
 
-TaskSet TaskSetGenerator::genModifiedKraemer(int precision, Fraction util, int task_count, Fraction min_period, Fraction max_period) {
+TaskSet TaskSetGenerator::genModifiedKraemer(int precision, Fraction util, int task_count, int min_period, int max_period) {
     // input validation
     auto frac_valid = [precision](Fraction frac) {
         return (frac * precision).isInt();
     };
-    if (precision < 1 || task_count < 1 || util <= 0 || !frac_valid(util) || !frac_valid(min_period) || !frac_valid(max_period)) return {};
+    if (precision < 1 || task_count < 1 || util <= 0 || !frac_valid(util)) return {};
     
     // scale up time values by precision (works on discrete time of units 1/precision)
     int scaled_util = (util * precision).getNum();
     if (scaled_util < task_count) return {};
-    int scaled_min_period = (min_period * precision).getNum();
-    int scaled_max_period = (max_period * precision).getNum();
-
 
     // modified Kraemers
-    std::uniform_int_distribution<int> util_urand(1, precision - 1), period_urand(scaled_min_period, scaled_max_period);
+    std::uniform_int_distribution<int> util_urand(1, scaled_util - 1), period_urand(min_period, max_period);
     std::vector<int> scaled_utils(task_count);
     while (true) {
         std::set<int> partitions;
@@ -33,10 +30,8 @@ TaskSet TaskSetGenerator::genModifiedKraemer(int precision, Fraction util, int t
             partitions.insert(util_urand(gen));
         bool valid = true;
         int i = -1;
-        for (auto prev = partitions.begin(), curr = ++partitions.begin(); valid && curr != partitions.end(); ++prev, ++curr) {
-            scaled_utils[++i] = *curr - *prev;
-            valid = scaled_util <= precision;
-        }
+        for (auto prev = partitions.begin(), curr = ++partitions.begin(); valid && curr != partitions.end(); ++prev, ++curr)
+            valid = (scaled_utils[++i] = *curr - *prev) <= precision;
         if (valid) break;
     }
 
@@ -45,7 +40,7 @@ TaskSet TaskSetGenerator::genModifiedKraemer(int precision, Fraction util, int t
     task_set.reserve(task_count);
     for (int scaled_util : scaled_utils) {
         Fraction task_util = Fraction(scaled_util, precision);
-        Fraction task_period = Fraction(period_urand(gen), precision);
+        Fraction task_period = Fraction(period_urand(gen));
         task_set.emplace_back(task_period, task_util * task_period);
     }
     return task_set;
@@ -63,18 +58,16 @@ std::vector<double> uunifast(std::default_random_engine& gen, double u, int n) {
     return s;
 }
 
-TaskSet TaskSetGenerator::genUUniFastDiscard(int precision, Fraction util, int task_count, Fraction min_period, Fraction max_period) {
+TaskSet TaskSetGenerator::genUUniFastDiscard(int precision, Fraction util, int task_count, int min_period, int max_period) {
     // input validation
     auto frac_valid = [precision](Fraction frac) {
         return (frac * precision).isInt();
     };
-    if (precision < 1 || task_count < 1 || util <= 0 || !frac_valid(util) || !frac_valid(min_period) || !frac_valid(max_period)) return {};
+    if (precision < 1 || task_count < 1 || util <= 0 || !frac_valid(util)) return {};
     
     // scale up time values by precision (works on discrete time of units 1/precision)
     int scaled_util = (util * precision).getNum();
     if (scaled_util < task_count) return {};
-    int scaled_min_period = (min_period * precision).getNum();
-    int scaled_max_period = (max_period * precision).getNum();
 
     // sample <task_count> dimensional simplex to get utils, discard ones with invalid tasks
     std::vector<int> scaled_utils(task_count);
@@ -107,12 +100,12 @@ TaskSet TaskSetGenerator::genUUniFastDiscard(int precision, Fraction util, int t
     }
 
     // construct task set
-    std::uniform_int_distribution<int> period_urand(scaled_min_period, scaled_max_period);
+    std::uniform_int_distribution<int> period_urand(min_period, max_period);
     TaskSet task_set;
     task_set.reserve(task_count);
     for (int scaled_util : scaled_utils) {
         Fraction task_util = Fraction(scaled_util, precision);
-        Fraction task_period = Fraction(period_urand(gen), precision);
+        Fraction task_period = Fraction(period_urand(gen));
         task_set.emplace_back(task_period, task_util * task_period);
     }
     std::random_shuffle(task_set.begin(), task_set.end()); // done to ensure bumps are sufficiently random

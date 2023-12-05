@@ -9,7 +9,7 @@ void assignToCores(const JobSet& active_jobs, CoreState& core_state, std::vector
     assert(chosen_jobs.size() <= core_state.size());
     sort(chosen_jobs.begin(), chosen_jobs.end());
     
-    // reassign chosen jobs already executing
+    // reassign chosen jobs already executing (mitigates context switches)
     for (int i : chosen_jobs)
         if (active_jobs[i].running)
             core_state[active_jobs[i].core] = i;
@@ -21,10 +21,18 @@ void assignToCores(const JobSet& active_jobs, CoreState& core_state, std::vector
         if (active_jobs[i].running)
             continue;
         
-        // prioritize previous core ran on (reduces migrations)
-        if (active_jobs[i].core != -1 && core_state[active_jobs[i].core] == -1) {
-            core_state[active_jobs[i].core] = i;
-            continue;
+        // prioritize previous core ran on (mitigates job-level migrations)
+        // if taken by job that is either fresh or migrating, swap places
+        if (active_jobs[i].core != -1) {
+            int prev_core = active_jobs[i].core;
+            if (core_state[prev_core] == -1) {
+                // assign to prev core
+                core_state[prev_core] = i;
+                continue;
+            } else if (active_jobs[core_state[prev_core]].core != prev_core) {
+                // swap with job on core
+                std::swap(core_state[prev_core], i);
+            }
         }
 
         // assign to empty core
