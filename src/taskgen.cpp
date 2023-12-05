@@ -108,7 +108,7 @@ TaskSet TaskSetGenerator::genUUniFastDiscard(int precision, Fraction util, int t
         Fraction task_period = Fraction(period_urand(gen));
         task_set.emplace_back(task_period, task_util * task_period);
     }
-    std::random_shuffle(task_set.begin(), task_set.end()); // done to ensure bumps are sufficiently random
+    std::shuffle(task_set.begin(), task_set.end(), gen); // done to ensure bumps are sufficiently random
 
     return task_set;
 }
