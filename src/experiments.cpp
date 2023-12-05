@@ -11,6 +11,7 @@
 #include <iostream>
 #include <fstream>
 #include <deque>
+#include <string>
 
 struct SchedulerData {
     std::vector<Fraction> util_data;
