@@ -10,7 +10,7 @@ Job Task::next_job(int task_id) {
     return job;
 }
 
-void Scheduler::init(const TaskSet& task_set) {}
+void Scheduler::init(const TaskSet& task_set, int cores) {}
 
 ScheduleDecision Scheduler::schedule(const SimModel& model) {
     return ScheduleDecision(model.cores);
@@ -126,7 +126,7 @@ void SimModel::sim(Fraction endTime) {
 void SimModel::reset(TaskSet task_set, Scheduler* scheduler, int cores) {
     this->task_set = task_set;
     this->scheduler = scheduler;
-    scheduler->init(task_set);
+    scheduler->init(task_set, cores);
     this->cores = cores;
     time = 0;
     missed = -1;

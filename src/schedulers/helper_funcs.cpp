@@ -39,18 +39,29 @@ void assignToCores(const JobSet& active_jobs, CoreState& core_state, std::vector
         while (core_state[++next_empty] != -1);
         core_state[next_empty] = i;
     }
-};
+}
 
-// helper function for getting the next scheduling event
-Fraction nextSchedEvent(const TaskSet& task_set, const JobSet& active_jobs, Fraction time) {
+// helper function for getting the next job release
+Fraction nextJobRelease(const TaskSet& task_set, const JobSet& active_jobs, Fraction time) {
     Fraction next_event = INT_MAX;
     // job release
     for (const Task& task : task_set)
         next_event = std::min(next_event, task.next_release);
+    return next_event;
+}
+
+// helper function for getting the next job deadline
+Fraction nextJobDeadline(const TaskSet& task_set, const JobSet& active_jobs, Fraction time) {
+    Fraction next_event = INT_MAX;
     // job deadline
     for (const Job& job : active_jobs)
         next_event = std::min(next_event, job.deadline);
     return next_event;
+}
+
+// helper function for getting the next scheduling event
+Fraction nextSchedEvent(const TaskSet& task_set, const JobSet& active_jobs, Fraction time) {
+    return std::min(nextJobRelease(task_set, active_jobs, time), nextJobDeadline(task_set, active_jobs, time));
 }
 
 Fraction nextJobCompletion(const JobSet& active_jobs, const CoreState& core_state, Fraction time) {

@@ -37,6 +37,8 @@ std::vector<int> chooseByPriority(const JobSet& active_jobs, int cores, T priori
 }
 
 // helper function for getting the next scheduling event
+Fraction nextJobRelease(const TaskSet& task_set, const JobSet& active_jobs, Fraction time);
+Fraction nextJobDeadline(const TaskSet& task_set, const JobSet& active_jobs, Fraction time);
 Fraction nextSchedEvent(const TaskSet& task_set, const JobSet& active_jobs, Fraction time);
 Fraction nextJobCompletion(const JobSet& active_jobs, const CoreState& core_state, Fraction time);
 

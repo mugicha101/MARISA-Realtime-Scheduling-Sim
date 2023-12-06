@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <utility>
 #include "../model.h"
 #include "helper_funcs.h"
 
@@ -17,7 +18,7 @@ struct GLLF : public Scheduler {
     bool valid_task_set = false;
     GLLF() : Scheduler(PriorityScheme::JOB_LEVEL_DYN, MigrationDegree::FULL) {}
     ScheduleDecision schedule(const SimModel& model) override;
-    void init(const TaskSet& task_set) override;
+    void init(const TaskSet& task_set, int cores) override;
 };
 
 // Global Deadline Monotonic (Rate Monotonic if implicit deadlines used)
@@ -44,7 +45,7 @@ struct PD2 : public Scheduler {
     bool valid_task_set = false;
     PD2(bool early_release = true) : Scheduler(PriorityScheme::UNRESTRICTED_DYN, MigrationDegree::FULL), early_release(early_release) {}
     ScheduleDecision schedule(const SimModel& model) override;
-    void init(const TaskSet& task_set) override;
+    void init(const TaskSet& task_set, int cores) override;
 };
 
 // Largest Lowest Remaining Execution First
@@ -53,7 +54,17 @@ struct LLREF : public Scheduler {
     std::unordered_map<long long, Fraction> local_exec;
     LLREF() : Scheduler(PriorityScheme::UNRESTRICTED_DYN, MigrationDegree::FULL) {}
     ScheduleDecision schedule(const SimModel& model) override;
-    void init(const TaskSet& task_set) override;
+    void init(const TaskSet& task_set, int cores) override;
+};
+
+// UEDF Optimal Scheduler
+struct UEDF : public Scheduler {
+    Fraction next_event;
+    std::vector<std::vector<std::pair<int,Fraction>>> core_budgets; // core -> (task id, budget)
+    std::vector<int> task_next_job;
+    UEDF() : Scheduler(PriorityScheme::UNRESTRICTED_DYN, MigrationDegree::FULL) {}
+    ScheduleDecision schedule(const SimModel& model) override;
+    void init(const TaskSet& task_set, int cores) override;
 };
 
 #endif

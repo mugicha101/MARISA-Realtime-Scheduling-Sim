@@ -1,6 +1,6 @@
 #include "schedulers.h"
 
-void LLREF::init(const TaskSet& task_set) {
+void LLREF::init(const TaskSet& task_set, int cores) {
     next_event = 0;
     local_exec.clear();
 }

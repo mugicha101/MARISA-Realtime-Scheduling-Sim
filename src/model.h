@@ -85,7 +85,7 @@ struct Scheduler {
     const MigrationDegree migration_degree;
     Scheduler(PriorityScheme priority_scheme, MigrationDegree migration_degree) : priority_scheme(priority_scheme), migration_degree(migration_degree) {}
 
-    virtual void init(const TaskSet& task_set);
+    virtual void init(const TaskSet& task_set, int cores);
 
     // assign jobs to cores
     virtual ScheduleDecision schedule(const SimModel& model);

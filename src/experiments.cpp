@@ -47,7 +47,7 @@ public:
         const int MIN_PERIOD = 4;
         const int MAX_PERIOD = 12;
         const int SIM_TIME = 1000;
-        const int SCHED_COUNT = 4;
+        const int SCHED_COUNT = 5;
         const int PD2_SCALE = 10;
 
         std::cout << "SETTING UP EXPERIMENT" << std::endl;
@@ -65,11 +65,16 @@ public:
 
         schedulers[2] = new PD2(true);
         scheduler_names[2] = "PD2";
-        sched_check_util[2] = Fraction(1,2) * cores;
+        sched_check_util[2] = Fraction(7,8) * cores;
 
         schedulers[3] = new LLREF();
         scheduler_names[3] = "LLREF";
         sched_check_util[3] = Fraction(1,1) * cores;
+
+        schedulers[4] = new UEDF();
+        scheduler_names[4] = "U-EDF";
+        sched_check_util[4] = Fraction(1,1) * cores;
+
         SchedulerData data[SCHED_COUNT];
         for (int i = 0; i < 4; ++i)
             data[i] = SchedulerData();

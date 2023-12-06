@@ -1,6 +1,6 @@
 #include "schedulers.h"
 
-void GLLF::init(const TaskSet& task_set) {
+void GLLF::init(const TaskSet& task_set, int cores) {
     valid_task_set = usesIntegerTime(task_set);
 }
 

@@ -9,15 +9,18 @@
 #include <algorithm>
 
 int main() {
+    /*
     Experiment::kraemer();
-    // Experiment::sched(2);
-    // Experiment::sched(4);
-    // Experiment::sched(8);
+    Experiment::sched(2);
+    Experiment::sched(4);
+    Experiment::sched(8);
+    return 0;
+    */
 
     Visualizer::init();
     SimModel model;
     // setup test model
-    Scheduler* scheduler = new LLREF();
+    Scheduler* scheduler = new UEDF();
     TaskSet task_set = TaskSetGenerator::genModifiedKraemer(10, 4, 12, 4, 12);
     model.reset(task_set, scheduler, 4);
 

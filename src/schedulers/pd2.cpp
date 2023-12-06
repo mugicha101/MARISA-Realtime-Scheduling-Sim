@@ -1,6 +1,6 @@
 #include "schedulers.h"
 
-void PD2::init(const TaskSet& task_set) {
+void PD2::init(const TaskSet& task_set, int cores) {
     valid_task_set = usesIntegerTime(task_set);
 }
 
@@ -39,14 +39,11 @@ ScheduleDecision PD2::schedule(const SimModel& model) {
         // priority order: deadline, is heavy, itv overlaps next, next group deadline
         // priority bitstring (64 bits):
         //   32b - deadline
-        //    1b - is heavy task
         //    1b - first interval overlaps next
-        //   30b - next group deadline
+        //   31b - next group deadline
         long long priority = (long long)(INT_MAX - first_itv.second) << 32; // deadline of current interval
-        if (job.exec_time + job.exec_time >= job.deadline) // heavy task
-            priority += (long long)1 << 31;
         if (overlapping_next) // first itv overlapping next
-            priority += (long long)1 << 30;
+            priority += (long long)1 << 31;
 
         while (curr_work < job.exec_time && overlapping_next && curr_itv_len == 2)
             step_itv();
