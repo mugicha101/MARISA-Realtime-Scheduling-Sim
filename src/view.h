@@ -193,7 +193,7 @@ struct ExecBlockView {
     MouseRegion core_mr;
 
     ExecBlockView(ExecBlock block) : block(block) {
-        label = std::to_string(block.task_id) + "," + std::to_string(block.job_id);
+        label = std::to_string(block.task_id+1) + "," + std::to_string(block.job_id+1);
     }
 
     float getX() const;

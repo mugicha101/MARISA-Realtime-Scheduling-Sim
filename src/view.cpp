@@ -138,7 +138,7 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
         auto frac_str = [](Fraction frac) {
             return frac.isInt() ? std::to_string(frac.getNum()) : std::to_string(frac.getNum()) + "/" + std::to_string(frac.getDen());
         };
-        std::string task_label = "task " + std::to_string(tid)
+        std::string task_label = "task " + std::to_string(tid+1)
                                 + ": (" + frac_str(task.phase) + ","
                                 + frac_str(task.period) + ","
                                 + frac_str(task.exec_time) + ","
@@ -149,7 +149,7 @@ void Visualizer::update(SimModel& model, const MouseState& mouse, float fps) {
 
     core_labels.resize(model.cores);
     for (int i = 0; i < model.cores; ++i) {
-        std::string core_label = "core " + std::to_string(i);
+        std::string core_label = "core " + std::to_string(i+1);
         task_labels[i] = TextBox(Pos(-55, i * BLOCK_SPACING + 0.5f), Pos(50, BLOCK_SPACING - 0.5f), 2.5f, core_label, true);
         task_labels[i].draw(window, cores_tf * Transform::scale(cores_tf.sx() / cores_tf.sy(), 1).inv());
     }
