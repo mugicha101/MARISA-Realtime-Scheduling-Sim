@@ -1,0 +1,916 @@
+%% bare_conf_compsoc.tex
+%% V1.4b
+%% 2015/08/26
+%% by Michael Shell
+%% See:
+%% http://www.michaelshell.org/
+%% for current contact information.
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.8b or later) with an IEEE Computer
+%% Society conference paper.
+%%
+%% Support sites:
+%% http://www.michaelshell.org/tex/ieeetran/
+%% http://www.ctan.org/pkg/ieeetran
+%% and
+%% http://www.ieee.org/
+
+%%*************************************************************************
+%% Legal Notice:
+%% This code is offered as-is without any warranty either expressed or
+%% implied; without even the implied warranty of MERCHANTABILITY or
+%% FITNESS FOR A PARTICULAR PURPOSE! 
+%% User assumes all risk.
+%% In no event shall the IEEE or any contributor to this code be liable for
+%% any damages or losses, including, but not limited to, incidental,
+%% consequential, or any other damages, resulting from the use or misuse
+%% of any information contained here.
+%%
+%% All comments are the opinions of their respective authors and are not
+%% necessarily endorsed by the IEEE.
+%%
+%% This work is distributed under the LaTeX Project Public License (LPPL)
+%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+%% distributed and modified. A copy of the LPPL, version 1.3, is included
+%% in the base LaTeX documentation of all distributions of LaTeX released
+%% 2003/12/01 or later.
+%% Retain all contribution notices and credits.
+%% ** Modified files should be clearly indicated as such, including  **
+%% ** renaming them and changing author support contact information. **
+%%*************************************************************************
+
+
+% *** Authors should verify (and, if needed, correct) their LaTeX system  ***
+% *** with the testflow diagnostic prior to trusting their LaTeX platform ***
+% *** with production work. The IEEE's font choices and paper sizes can   ***
+% *** trigger bugs that do not appear when using other class files.       ***                          ***
+% The testflow support page is at:
+% http://www.michaelshell.org/tex/testflow/
+
+
+
+\documentclass[conference,compsoc]{IEEEtran}
+% Some/most Computer Society conferences require the compsoc mode option,
+% but others may want the standard conference format.
+%
+% If IEEEtran.cls has not been installed into the LaTeX system files,
+% manually specify the path to it like:
+% \documentclass[conference,compsoc]{../sty/IEEEtran}
+
+
+
+
+
+% Some very useful LaTeX packages include:
+% (uncomment the ones you want to load)
+
+
+% *** MISC UTILITY PACKAGES ***
+%
+%\usepackage{ifpdf}
+% Heiko Oberdiek's ifpdf.sty is very useful if you need conditional
+% compilation based on whether the output is pdf or dvi.
+% usage:
+% \ifpdf
+%   % pdf code
+% \else
+%   % dvi code
+% \fi
+% The latest version of ifpdf.sty can be obtained from:
+% http://www.ctan.org/pkg/ifpdf
+% Also, note that IEEEtran.cls V1.7 and later provides a builtin
+% \ifCLASSINFOpdf conditional that works the same way.
+% When switching from latex to pdflatex and vice-versa, the compiler may
+% have to be run twice to clear warning/error messages.
+
+
+
+
+
+
+% *** CITATION PACKAGES ***
+%
+\ifCLASSOPTIONcompsoc
+  % IEEE Computer Society needs nocompress option
+  % requires cite.sty v4.0 or later (November 2003)
+  \usepackage[nocompress]{cite}
+\else
+  % normal IEEE
+  \usepackage{cite}
+\fi
+% cite.sty was written by Donald Arseneau
+% V1.6 and later of IEEEtran pre-defines the format of the cite.sty package
+% \cite{} output to follow that of the IEEE. Loading the cite package will
+% result in citation numbers being automatically sorted and properly
+% "compressed/ranged". e.g., [1], [9], [2], [7], [5], [6] without using
+% cite.sty will become [1], [2], [5]--[7], [9] using cite.sty. cite.sty's
+% \cite will automatically add leading space, if needed. Use cite.sty's
+% noadjust option (cite.sty V3.8 and later) if you want to turn this off
+% such as if a citation ever needs to be enclosed in parenthesis.
+% cite.sty is already installed on most LaTeX systems. Be sure and use
+% version 5.0 (2009-03-20) and later if using hyperref.sty.
+% The latest version can be obtained at:
+% http://www.ctan.org/pkg/cite
+% The documentation is contained in the cite.sty file itself.
+%
+% Note that some packages require special options to format as the Computer
+% Society requires. In particular, Computer Society  papers do not use
+% compressed citation ranges as is done in typical IEEE papers
+% (e.g., [1]-[4]). Instead, they list every citation separately in order
+% (e.g., [1], [2], [3], [4]). To get the latter we need to load the cite
+% package with the nocompress option which is supported by cite.sty v4.0
+% and later.
+
+
+
+
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+% graphicx was written by David Carlisle and Sebastian Rahtz. It is
+% required if you want graphics, photos, etc. graphicx.sty is already
+% installed on most LaTeX systems. The latest version and documentation
+% can be obtained at: 
+% http://www.ctan.org/pkg/graphicx
+% Another good source of documentation is "Using Imported Graphics in
+% LaTeX2e" by Keith Reckdahl which can be found at:
+% http://www.ctan.org/pkg/epslatex
+%
+% latex, and pdflatex in dvi mode, support graphics in encapsulated
+% postscript (.eps) format. pdflatex in pdf mode supports graphics
+% in .pdf, .jpeg, .png and .mps (metapost) formats. Users should ensure
+% that all non-photo figures use a vector format (.eps, .pdf, .mps) and
+% not a bitmapped formats (.jpeg, .png). The IEEE frowns on bitmapped formats
+% which can result in "jaggedy"/blurry rendering of lines and letters as
+% well as large increases in file sizes.
+%
+% You can find documentation about the pdfTeX application at:
+% http://www.tug.org/applications/pdftex
+
+
+
+
+
+% *** MATH PACKAGES ***
+%
+%\usepackage{amsmath}
+% A popular package from the American Mathematical Society that provides
+% many useful and powerful commands for dealing with mathematics.
+%
+% Note that the amsmath package sets \interdisplaylinepenalty to 10000
+% thus preventing page breaks from occurring within multiline equations. Use:
+%\interdisplaylinepenalty=2500
+% after loading amsmath to restore such page breaks as IEEEtran.cls normally
+% does. amsmath.sty is already installed on most LaTeX systems. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/pkg/amsmath
+
+
+
+
+
+% *** SPECIALIZED LIST PACKAGES ***
+%
+%\usepackage{algorithmic}
+% algorithmic.sty was written by Peter Williams and Rogerio Brito.
+% This package provides an algorithmic environment fo describing algorithms.
+% You can use the algorithmic environment in-text or within a figure
+% environment to provide for a floating algorithm. Do NOT use the algorithm
+% floating environment provided by algorithm.sty (by the same authors) or
+% algorithm2e.sty (by Christophe Fiorio) as the IEEE does not use dedicated
+% algorithm float types and packages that provide these will not provide
+% correct IEEE style captions. The latest version and documentation of
+% algorithmic.sty can be obtained at:
+% http://www.ctan.org/pkg/algorithms
+% Also of interest may be the (relatively newer and more customizable)
+% algorithmicx.sty package by Szasz Janos:
+% http://www.ctan.org/pkg/algorithmicx
+
+
+
+
+% *** ALIGNMENT PACKAGES ***
+%
+%\usepackage{array}
+% Frank Mittelbach's and David Carlisle's array.sty patches and improves
+% the standard LaTeX2e array and tabular environments to provide better
+% appearance and additional user controls. As the default LaTeX2e table
+% generation code is lacking to the point of almost being broken with
+% respect to the quality of the end results, all users are strongly
+% advised to use an enhanced (at the very least that provided by array.sty)
+% set of table tools. array.sty is already installed on most systems. The
+% latest version and documentation can be obtained at:
+% http://www.ctan.org/pkg/array
+
+
+% IEEEtran contains the IEEEeqnarray family of commands that can be used to
+% generate multiline equations as well as matrices, tables, etc., of high
+% quality.
+
+
+
+
+% *** SUBFIGURE PACKAGES ***
+%\ifCLASSOPTIONcompsoc
+%  \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
+%\else
+%  \usepackage[caption=false,font=footnotesize]{subfig}
+%\fi
+% subfig.sty, written by Steven Douglas Cochran, is the modern replacement
+% for subfigure.sty, the latter of which is no longer maintained and is
+% incompatible with some LaTeX packages including fixltx2e. However,
+% subfig.sty requires and automatically loads Axel Sommerfeldt's caption.sty
+% which will override IEEEtran.cls' handling of captions and this will result
+% in non-IEEE style figure/table captions. To prevent this problem, be sure
+% and invoke subfig.sty's "caption=false" package option (available since
+% subfig.sty version 1.3, 2005/06/28) as this is will preserve IEEEtran.cls
+% handling of captions.
+% Note that the Computer Society format requires a sans serif font rather
+% than the serif font used in traditional IEEE formatting and thus the need
+% to invoke different subfig.sty package options depending on whether
+% compsoc mode has been enabled.
+%
+% The latest version and documentation of subfig.sty can be obtained at:
+% http://www.ctan.org/pkg/subfig
+
+
+
+
+% *** FLOAT PACKAGES ***
+%
+%\usepackage{fixltx2e}
+% fixltx2e, the successor to the earlier fix2col.sty, was written by
+% Frank Mittelbach and David Carlisle. This package corrects a few problems
+% in the LaTeX2e kernel, the most notable of which is that in current
+% LaTeX2e releases, the ordering of single and double column floats is not
+% guaranteed to be preserved. Thus, an unpatched LaTeX2e can allow a
+% single column figure to be placed prior to an earlier double column
+% figure.
+% Be aware that LaTeX2e kernels dated 2015 and later have fixltx2e.sty's
+% corrections already built into the system in which case a warning will
+% be issued if an attempt is made to load fixltx2e.sty as it is no longer
+% needed.
+% The latest version and documentation can be found at:
+% http://www.ctan.org/pkg/fixltx2e
+
+
+%\usepackage{stfloats}
+% stfloats.sty was written by Sigitas Tolusis. This package gives LaTeX2e
+% the ability to do double column floats at the bottom of the page as well
+% as the top. (e.g., "\begin{figure*}[!b]" is not normally possible in
+% LaTeX2e). It also provides a command:
+%\fnbelowfloat
+% to enable the placement of footnotes below bottom floats (the standard
+% LaTeX2e kernel puts them above bottom floats). This is an invasive package
+% which rewrites many portions of the LaTeX2e float routines. It may not work
+% with other packages that modify the LaTeX2e float routines. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/pkg/stfloats
+% Do not use the stfloats baselinefloat ability as the IEEE does not allow
+% \baselineskip to stretch. Authors submitting work to the IEEE should note
+% that the IEEE rarely uses double column equations and that authors should try
+% to avoid such use. Do not be tempted to use the cuted.sty or midfloat.sty
+% packages (also by Sigitas Tolusis) as the IEEE does not format its papers in
+% such ways.
+% Do not attempt to use stfloats with fixltx2e as they are incompatible.
+% Instead, use Morten Hogholm'a dblfloatfix which combines the features
+% of both fixltx2e and stfloats:
+%
+% \usepackage{dblfloatfix}
+% The latest version can be found at:
+% http://www.ctan.org/pkg/dblfloatfix
+
+
+
+
+% *** PDF, URL AND HYPERLINK PACKAGES ***
+%
+%\usepackage{url}
+% url.sty was written by Donald Arseneau. It provides better support for
+% handling and breaking URLs. url.sty is already installed on most LaTeX
+% systems. The latest version and documentation can be obtained at:
+% http://www.ctan.org/pkg/url
+% Basically, \url{my_url_here}.
+
+
+
+
+% *** Do not adjust lengths that control margins, column widths, etc. ***
+% *** Do not use packages that alter fonts (such as pslatex).         ***
+% There should be no need to do such things with IEEEtran.cls V1.6 and later.
+% (Unless specifically asked to do so by the journal or conference you plan
+% to submit to, of course. )
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\usepackage{caption}
+\usepackage{minted}
+\usemintedstyle{vs}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage[margin=0.25in]{geometry}
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.9}
+\usepackage{cleveref}
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{algpseudocode}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\renewcommand{\Statex}[1][3]{%
+  \setlength\@tempdima{\algorithmicindent}%
+  \OldStatex\hskip\dimexpr#1\@tempdima\relax}
+  
+\begin{document}
+%
+% paper title
+% Titles are generally capitalized except for words such as a, an, and, as,
+% at, but, by, for, in, nor, of, on, or, the, to and up, which are usually
+% not capitalized unless they are the first or last word of the title.
+% Linebreaks \\ can be used within to get better formatting as desired.
+% Do not put math or special symbols in the title.
+\title{MARISA: A Multiprocessor and Real-Time Interactive Scheduling Analyzer}
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{\IEEEauthorblockN{Alexander Yoshida}
+\IEEEauthorblockA{
+COMP 737 Real-Time Systems Final Project\\
+December 06, 2023}}
+
+% conference papers do not typically use \thanks and this command
+% is locked out in conference mode. If really needed, such as for
+% the acknowledgment of grants, issue a \IEEEoverridecommandlockouts
+% after \documentclass
+
+% for over three affiliations, or if they all won't fit within the width
+% of the page (and note that there is less available width in this regard for
+% compsoc conferences compared to traditional conferences), use this
+% alternative format:
+% 
+%\author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
+%Homer Simpson\IEEEauthorrefmark{2},
+%James Kirk\IEEEauthorrefmark{3}, 
+%Montgomery Scott\IEEEauthorrefmark{3} and
+%Eldon Tyrell\IEEEauthorrefmark{4}}
+%\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
+%Georgia Institute of Technology,
+%Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
+%\IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
+%Email: homer@thesimpsons.com}
+%\IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
+%Telephone: (800) 555--1212, Fax: (888) 555--1212}
+%\IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
+
+
+
+
+% use for special paper notices
+%\IEEEspecialpapernotice{(Invited Paper)}
+
+
+
+
+% make the title area
+\maketitle
+
+% As a general rule, do not put math, special symbols or citations
+% in the abstract
+\begin{abstract}
+MARISA is a proof-of-concept multiprocessor real-time scheduling simulator and visualizer. In this paper, we will compare its design against similar tools, outline its implementation structure, showcase its application by comparing various scheduling algorithms on randomly generated task sets, and examine possible future developments.
+\end{abstract}
+
+% no keywords
+
+
+
+
+% For peer review papers, you can put extra information on the cover
+% page as needed:
+% \ifCLASSOPTIONpeerreview
+% \begin{center} \bfseries EDICS Category: 3-BBND \end{center}
+% \fi
+%
+% For peerreview papers, this IEEEtran command inserts a page break and
+% creates the second title. It will be ignored for other modes.
+\IEEEpeerreviewmaketitle
+
+
+
+\section{Introduction}
+When conducting research involving real-time scheduling, there are cases where a simulator is required to analyze the scheduling of a task set in an ideal or controlled environment not possible by RTOSes. Tools such as the one proposed in this paper are designed to serve as a simulation framework that can be configured or easily extended to fit the needs of the experiment to reduce the time and effort spent implementing specialized simulators for each specific use case. The Multiprocessor and Realtime Interactive Scheduling Analyzer, abbreviated as MARISA, is a proof-of-concept application that provides an extendible simulator for real-time task sets as well as a visualizer to analyze schedules generated from the simulator. In this paper, we will compare MARISA against similar general real-time simulation tools, cover MARISA's design, and apply MARISA to compare various multiprocessor scheduling algorithms. Alongside this, we will touch upon various aspects of real-time systems pertinent to simulation such as time representation and uniform sampling of task sets.
+
+\subsection{Notational Definitions}
+For later use in this paper, we will outline the notation used to describe the task model. Unless stated otherwise, we will be using the synchronous periodic task model, which means tasks release jobs on every period boundary starting at time $0$. We will also use continuous time unless stated otherwise, which allows for time to be represented by any real number. In addition, tasks will have implicit deadlines, meaning the relative deadline of a task matches its period. A task set $\tau$ consists of $n$ tasks. The $i$th task in the task set is denoted by $\tau_i$ for $1 \leq i \leq n$. Each task $\tau_i$ has an execution time of $C_i$ and a period of $T_i$. The deadline $D_i$ of task $\tau_i$ matches its period $T_i$. The utilization $U_i$ of task $\tau_i$ is defined as $U_i = \frac{C_i}{T_i}$. The utilization of a task set is defined as $U = \sum_{i=1}^nU_i$. The $j$th released job from task $\tau_i$ is denoted by $J_{i,j}$, while an arbitrary job is denoted by $J_j$. Each job $J_{i,j}$ is released at time $r_{i,j} = jT_i$, has a deadline at time $d_{i,j} = r_{i,j} + D_i$, and has an execution time of $T_i$. At an arbitrary time $t$, the runtime of job $J_j$ is denoted by $E_j$, which is how long the job has executed for by time $t$. If job $J_{i,j}$ has a runtime $E_j < T_i$ at time $d_{i,j}$, it misses its deadline. The remaining execution time is thus equivalent to $C_i - E_j$.
+
+\section{Comparison Against Similar Tools}
+There exist similar tools to MARISA that are used for analyzing and simulating multicore real-time task sets scheduled under various configurations with many design overlaps. This section will cover some high-level design goals and features of a set of similar tools and how MARISA compares to them.
+
+\subsection{Sample Set}
+All tools analyzed have associated publications and can visualize at minimum multicore scheduling of a task set under various scheduling policies. In addition, they all have easily accessible source code or documentation that we will use for analyzing design considerations.
+The first tool is Cheddar \cite{cheddar_paper}, a general-purpose real-time scheduling simulator/analyzer created in 2002 that still has active development. The next tool is YARTISS \cite{yartiss_paper}, a real-time scheduling simulator developed by a lab in 2012. YARTISS is the successor of various similar tools developed by the same lab since 2005, although development ceased soon after its release. The third tool is SimSo \cite{simso_paper}, a multiprocessor scheduling simulator focusing on overhead accounting and task set generation. SimSo was released in 2014 and was last updated in 2022. The last tool is MCRTsim \cite{mcrtsim_paper}, an open-source multiprocessor scheduling simulator that accounts for processors with multiple variable-speed cores. All of these tools are open-source except YARTISS, which was developed solely by the lab producing it, although the code is still publically accessible \cite{yartiss_docs}. These tools should act as a basis for the potential future of MARISA, as MARISA is still very early in development. However, there are also a handful of potential advantages MARISA has over these existing tools.
+
+\subsection{Programming Language}
+Aside from SimSo which uses Python, all of these tools use Java. This is likely because they have modularity as a design goal, as these tools need to be easily extendable for general use. On the other hand, MARISA uses C++ as well as the SFML graphics library for rendering and user interaction. Although the primary general advantage C++ has over other languages is its performance, this isn't considered an important design consideration for most task-set simulation tools. Instead for MARISA, its main advantage is to use a language closer to what RTOS developers use. There may also be an advantage in the ability for RTOS schedulers to be directly included in MARISA, as brought up by the creators of ERTSim \cite{ertsim}, another real-time scheduling simulator/visualizer tool written in C++. However, the increased development difficulty may be why tools migrated to Java over time, and ERTSim as a program appears to not be publically accessible despite being supposedly open-source.
+
+\subsection{Code Organization}
+The code structures of the analyzed tools share many overlaps. Thus the implementation of these tools can be organized into and compared using the following set of common components.
+
+\subsubsection{Workload Component} The workload component specifies the task model and may include resource and task dependencies. This includes classes for representing tasks, jobs, resources, and so on. Cheddar deviates from the terminology of other tools as it uses messaging terminology such as messages, buffers, reading, and writing to refer to jobs, job queues, and job operations \cite{cheddar_paper}. However, the other tools use similar terminology to the one used in this paper.
+
+\subsubsection{Protocol Component} The protocol component specifies the implementation of various scheduling, resource access, and synchronization protocols/algorithms. It is typically separated into separate code files for each protocol, and in Cheddar's case is implemented in a custom Architecture Description Language (ADL) \cite{cheddar_docs}.
+
+\subsubsection{Simulator Component} The simulator component is responsible for the scheduling of a task set using a scheduler. It stores the current simulation state at a certain time, including the active job and core states, as well as execution history. It also includes the specific resource access, synchronization, and other protocols used during simulation.
+
+\subsubsection{Visualizer Component} The visualizer component represents the GUI used to display the simulation, experimental results, etc. It usually also includes the ability to configure the simulation parameters. In particular, the distinction between the visualizer component from the rest of the components allows the tools to perform in head-less mode, which is useful for experiments and applications that do not require the visualizer as in MARISA's case the visualizer is the performance bottleneck.
+
+\subsection{Task Model}
+All the analyzed tools support periodic/sporadic tasks and support other task models such as soft real-time, and background tasks modeled as servers.
+
+\subsection{Time Model}
+The timing model of schedulers plays a critical role in the set of supported schedulers, the timing precision of the models, and the performance of the simulators. For discrete time, time values can be represented with infinite precision by using integers. This is the approach taken by Cheddar, YARTISS, and SimSo \cite{cheddar_repo, yartiss_docs, simso_repo}. Discrete models are sufficient for most schedulability analyses, as any schedule can be converted to an equivalent discrete-time schedule by multiplying all time units by a scaling factor. However, there are some schedulers such as the base LLREF scheduler that require scheduling events at non-integer times even with discrete-time tasks and thus need modifications to work on discrete time. Continuous time can be represented in multiple ways, with the straightforward way being to represent them as floating-point values. MCRTsim \cite{mcrtsim_repo} uses this approach by modeling time using 64-bit floating point values. However, the downside to this approach is that small precision errors are introduced due to the limitations on the range of possible values represented by floating-point values. Another way of representing continuous time is by using fractional values represented by an integer numerator and an integer denominator. MARISA uses this approach by utilizing a custom fraction class. However, performance on fractions is reduced heavily compared to integers and floats due to the increased number of instructions per operation. There is also a high overflow risk with a basic implementation when using fractions, as all arithmetic operations scale values exponentially in the worst case since multiplication is required. The chance of overflow in the average case can be greatly mitigated by reducing fractions whenever possible at the cost of performance. With variable-length integers, overflow can be avoided entirely at the cost of increased performance and memory overheads.
+
+\subsection{Default Schedulers}
+For the tools analyzed, there exists a set of default scheduler implementations as well as a way for users to define custom schedulers. Both existing schedulers and user-defined schedulers are defined as scheduler sub-classes in individual class files. Cheddar works slightly differently by using a custom version of Architecture Description Language (Cheddar ADL) to define schedulers \cite{cheddar_docs}. MARISA stores schedulers similarly by having each defined in a C++ class file. Excluding YARTISS, the algorithms included by all the analyzed tools are similar with some disparities. YARTISS is excluded from the analyzed tools for this section due to its focus on energy-aware scheduling algorithms \cite{yartiss_docs}. Ignoring variants of algorithms such as non-preemptive and work-conserving, they can be categorized as follows.
+
+\subsubsection{Global Uniprocessor Algorithms}
+This class of algorithms contains algorithms created for uniprocessor scheduling that have been applied to multiprocessor scheduling through the use of a global job queue. The standard set of algorithms includes global versions of Earliest Deadline First (EDF), Least Laxity First (LLF), Rate Monotonic (RM), and Deadline Monotonic (DM) \cite{cheddar_docs, mcrtsim_repo, simso_repo}.
+
+\subsubsection{Partitioned/Clustered Algorithms}
+This class consists of algorithms utilizing a partitioning policy to distribute tasks among processor groupings or individual processors. The most common basic partitioning policies are first-fit, best-fit, and worst-fit. Clustered algorithms use processor groups of arbitrary sizes while partitioned uses a group size of one. All analyzed tools provide a class for partitioned algorithms.
+
+\subsubsection{Hybrid Algorithms}
+This class consists of algorithms that combine or take components from other algorithms, such as EDZL which behaves like EDF but prioritizes jobs with zero laxity \cite{edzl}.
+
+\subsubsection{Optimal Algorithms}
+This class of algorithms is optimal for multi-processor scheduling since if a valid schedule exists for a task set these algorithms can schedule it. However, they typically incur significant overheads and thus are deemed impractical. This class contains Pfair schedulers such as PD$^2$ \cite{pd2}, Largest Local Remaining Execution Time First (LLREF) \cite{llref}, Reduce to Unicore (RUN) \cite{run}, U-EDF \cite{uedf}, and others. Due to the complexities of RUN, SimSo implements it across several classes \cite{simso_repo}, Cheddar uses an unsafe prototype \cite{cheddar_repo}, and MCRTsim opted not to include it \cite{mcrtsim_repo}. MARISA also opted not to include RUN.
+
+\subsection{Visualizer and Interface}
+Except for SimSo, all analyzed tools provide a visualizer, typically with a user interface that enables better access to information, and an editor for configuring the simulation without modifying code. YARTISS can visualize other data such as experimental results \cite{yartiss_paper}. Cheddar allows the user to interface its simulator with external visualizers \cite{cheddar_docs}. The visualizer implemented in MARISA displays key information such as job execution blocks associated with each task and core, however it is still very rudimentary.
+
+\subsection{Additional Features}
+There are many core features shared between the analyzed tools that MARISA currently lacks any support for, such as resource access control, task synchronization and dependencies, overhead considerations, and so on. MARISA's design should facilitate the extension of the code for these features with future development.
+
+\section{MARISA Implementation}
+\subsection{Overview}
+For this section, we will outline MARISA's implementation structure in components defined in section 2.3, as well as various approaches used in its design. Going forward, classes refer to both C++ structs and C++ classes for succinctness. The code files for each component are as follows.
+\begin{itemize}
+    \item Workload and Simulator - src/model.h, src/model.cpp
+    \item Protocol (just schedulers) - src/model.h, src/schedulers/
+    \item Visualizer - src/view.h, src/view.cpp, main.cpp
+\end{itemize}
+
+\subsection{Workload Component}
+The task model is represented by the Task and Job classes. Job objects represent an instance of a real-time job. Likewise, task objects represent an instance of a real-time task under the periodic model. All time units operate on continuous time utilizing the fraction class defined in section 2.5.
+
+\subsection{Simulator Component}
+All simulation is handled by the SimModel class. A SimModel object contains a single simulation state, which can be advanced and, if enabled, stores information about execution history.
+
+\subsubsection{Simulation State}
+The current simulation state consists of a set of active/released jobs and represents the simulation state just before the next scheduling decision. This means that the current time $t$ is equivalent to the next scheduling event, but that scheduling event has not been handled yet. To advance $t$ to the next scheduling event $t'$, first, any jobs released by time $t$ are added to the set of active jobs. Then the active jobs are sorted with currently executing jobs first, suspended jobs after, and new jobs last. This sort helps reduce context switches and migrations, as jobs already executing or with a previous core are prioritized first in tie-break scenarios.
+
+\subsubsection{History Tracking}
+The simulation history is tracked primarily through Execution Blocks, which are chunks of time representing a specific job executing on a specific core. These blocks enable the visualization to occur, as they encode the execution history of the task set.
+
+\subsection{Protocol Component}
+Since MARISA lacks resource access control and synchronization protocols, the protocol component consists of the various scheduling algorithms MARISA supports.
+
+\subsubsection{Supported Schedulers}
+Currently, MARISA supports GFIFO, GEDF, GLLF, GDM, EDZL, PD2, LLREF, and U-EDF. MARISA lacks implementations for the various schedulers that tools such as Cheddar support. These include partitioning algorithms utilizing bin-packing heuristics such as best-fit, clustered algorithms that hybridize partitioned and global scheduling, soft real-time algorithms such as proportional share, complex algorithms such as RUN, and various miscellaneous algorithms such as MUF, EDH, and RR. As the existing code structure of MARISA should facilitate such extensions, adding these schedulers to MARISA is simply a matter of implementing them.
+
+\subsubsection{Migration and Context-Switch Avoidance}
+To avoid unnecessary migration and context switches, MARISA first applies the sort described in section 3.3.1 to favor already executing or previously executing tasks during prioritization. Then after the top priority jobs are determined, any already executing jobs are reassigned to their previous core to avoid context switches. After this, any preempted job is assigned to its previous core unless an already executing job is on it to avoid migrations. Fresh jobs cannot context switch or migrate, so they can be assigned to cores arbitrarily.
+
+\begin{figure}
+\includegraphics[width=4in]{MARISA_standard.png}
+\caption{MARISA's visualizer with a task set of size 12 with a total utilization of 3 scheduled on 3 cores with LLREF.}
+\label{fig_marisa_standard}
+\end{figure}
+\begin{figure}
+\includegraphics[width=4in]{MARISA_hover.png}
+\caption{MARISA's visualizer with an execution block is hovered over by the mouse cursor to highlight all execution blocks associated with its job.}
+\label{fig_marisa_hover}
+\end{figure}
+\begin{figure}
+\includegraphics[width=4in]{MARISA_squished.png}
+\caption{MARISA's visualizer with a small x-axis scaling and zoomed out.}
+\label{fig_marisa_squished}
+\end{figure}
+\begin{figure}
+\includegraphics[width=4in]{MARISA_far.png}
+\caption{MARISA's visualizer with screen region translated far on the x-axis.}
+\label{fig_marisa_far}
+\end{figure}
+
+\subsection{Visualizer Component}
+The Visualizer is responsible for rendering execution blocks to the screen as shown in figure \ref{fig_marisa_standard}. The x-axis denotes time, which advances from left to right. Execution blocks are aligned vertically onto tracks, which are described in sections 3.5.1 and 3.5.2. When sufficiently large, the label formatted as $i,j$ appears on the execution block associated with the $j$th block of the $i$th task, and job deadlines are denoted by T-shaped markings at the end of an execution block.
+
+\subsubsection{Task Tracks}
+The first set of tracks is denoted as the task tracks, with each track corresponding to a specific task. Execution blocks on this track are colored such that each job released from the task has a separate color.
+
+\subsubsection{Core Tracks} The second set of tracks is denoted as the core tracks, with each track corresponding to a specific core. Execution blocks on this track are colored such that each task in the task set has a separate color.
+
+\subsubsection{Manipulating the Screen Region} The visualizer has a notion of camera position in that the region displayed on the screen can be moved and scaled. Translation is done by dragging the screen with the mouse cursor. Scaling is supported by zooming in and out using the scroll wheel or arrow keys, including axis-specific scaling as showcased in figure \ref{fig_marisa_squished}. The simulator advances time such that any execution blocks on screen are accounted for. Figure \ref{fig_marisa_far} showcases the screen region translated arbitrarily far on the x-axis. In the event of a job miss, nothing past the job miss is simulated.
+
+\subsubsection{Highlighting Jobs} If the mouse is hovered over an execution block, all execution blocks that are not part of the job associated with the hovered execution block are dimmed. This is shown in \ref{fig_marisa_hover}.
+
+\subsection{Source Code}
+Source code for MARISA can be accessed publically at https://github.com/mugicha101/MARISA-Realtime-Scheduling-Sim.
+MARISA was tested on Windows 11 with MinGW version 13.1.0. Although MARISA successfully compiled on Linux and Mac, execution on those platforms has not been vetted beyond that.
+
+\section{Comparison of Scheduling Algorithms}
+One of the main applications of MARISA and similar tools is to analyze and compare different scheduling algorithms against each other. The following section showcases this by comparing the schedules of GEDF, EDZL, PD$^2$ (with Early Releasing), and LLREF in terms of schedulability rate, context switches, and migrations.
+
+\subsection{Algorithm Overview}
+\subsubsection{GEDF}
+Global Earliest Deadline First is a global variant of Earliest Deadline First, which is an optimal scheduler for uniprocessor scheduling. However, for multiprocessor scheduling, GEDF is not optimal. As the name suggests, GEDF prioritizes jobs such that jobs with the earliest deadline have higher priority.
+\subsubsection{EDZL}
+\subsubsection{PD$^2$}
+\begin{figure}
+\includegraphics[width=4in]{MARISA_pd2.png}
+\caption{PD$^2$ schedule on the task set $\tau_0 = (5,2), \tau_1 = (10,7), \tau_2 = (10, 9)$ with two fully-utilized cores. Sub-task intervals are shown under each task track, with groups highlighted in light blue.}
+\label{fig_pd2}
+\end{figure}
+The PD$^2$ Algorithm achieves optimality on discrete time by approximating the fluid scheduler progress on jobs matching the fluid scheduler at scheduling events, which occur at the boundaries of every time quantum \cite{pd2}. Figure \ref{fig_pd2} showcases an example PD$^2$ schedule. Tasks are broken into sequential sub-tasks, each executing for one quantum within a time interval defined by lag bounds. The rough math behind satisfying these lag bounds is as follows. For the sake of simplicity, all time will operate relative to the analyzed job's release time $r_j$. The original authors of PD$^2$ take this a step further by defining everything relative to tasks rather than jobs \cite{pd2}, however the PD$^2$ scheduler in MARISA schedules based on jobs, which simplifies some implementation logic. As such, sub-tasks are parts of a job rather than a task. The runtime of job $J_j$ at time $t$ under the fluid scheduler is defined to be $f_j(t) = \frac{t}{D_j}C_j = tU_j$. The lag of job $J_j$ at time $t$ after the job's release $r_j$ is defined to be $L_j(t) = f_j(t) - E_j = tU_j - E_j = t\frac{C_i}{D_i}$, and describes how far behind the fluid scheduler PD$^2$ is. PD$^2$ lag bounds guarantee that $-1 < L_j(t) < 1$ at any point in time, which means $L_j(t) = 0$ at time quantum boundaries. From this rule, we can derive bounds for the time interval $l_k, r_k$ for which the $k$th sub-task $s_k$ can start executing. Suppose time $t$ is a valid time for $s_k$ to begin executing at. If $s_k$ executes at time $t$, by time $t+1$ the lag will have decreased as the execution of PD$^2$ outpaces the fluid scheduler. So we must ensure $L_j(t+1) > -1$ for $E_j = k$. In addition, the lag must be valid at time $t$ such that $L_j(t) < 1$ for $E_j = k-1$. $l_k$ and $r_k$ can be easily derived from these equations.
+Now that we have the schedulable intervals for all sub-tasks, we need to define the priority of sub-tasks. This is done by three levels of comparison in decreasing priority \cite{pd2}, the last two of which represent tie-break conditions.
+\begin{itemize}
+    \item \textbf{Earliest Sub-task Deadline First} - If a job's next sub-task interval ends earlier than another job, it is scheduled first.
+    \item \textbf{Interval Overlap (Tie-Break Condition 1)} - For a job attempting to schedule the $k$th sub-task, if $r_k$ overlaps $l_{k+1}$ then it has higher priority than jobs for which this is not the case. Sub-task intervals can only overlap by one time, so this overlap can be represented with a single bit, referred to as the $b$-bit by the original paper authors \cite{pd2}.
+    \item \textbf{Group Deadline (Tie-Break Condition 2)} - A group is defined as a sequence of overlapping intervals of size two. The group deadline is defined to be the time at which a group ends. Groups are important since if a subtask within the group executes at the second half of its interval, any future subtask within the group must execute in its second half. Thus larger group deadlines are prioritized over smaller group deadlines.
+\end{itemize}
+PD$^2$ early and late releases enable work-conserving behavior and optimality under the sporadic model \cite{pd2}. Early releasing is handled by stretching the next sub-task interval start to the current time, to allow sub-tasks to execute early. This enables PD$^2$ to be work-conserving. Late releases have already been handled in our case by calculating sub-task behavior relative to a job's release time rather than a periodic task. This enables PD$^2$ to be optimal under the sporadic model.
+
+\subsubsection{LLREF}
+\begin{figure}
+\includegraphics[width=4in]{LLREF.png}
+\caption{The first T-L Plane for LLREF schedule with three fully utilized cores.}
+\label{fig_llref}
+\end{figure}
+The Largest Local Remaining Execution First scheduler is an optimal multiprocessor scheduler on continuous time \cite{llref}. Like the PD$^2$ scheduler, it uses a fairness property derived from approximating the fluid scheduler. However, unlike the PD$^2$ scheduler, it only matches the fluid scheduler at scheduling events rather than at every time quantum. Since it does not use quantum-based scheduling, it retains optimality on continuous time. It uses an abstraction called the Time and Local Execution Time Domain Planes abbreviated to T-L planes to match the fluid schedule at every scheduling event. A T-L plane has the time along the x-axis and the remaining execution time on the y-axis and is bounded by a line of slope -1 \cite{llref}. Each T-L plane spans from one scheduling event to the next, with scheduling events occurring at every job release or deadline. A job's execution through the T-L plane is represented by its execution line. The key to LLREF’s optimality is restricting the scheduler to match the fluid scheduler at each scheduling event, with scheduling within the gaps between these events determined by its corresponding T-L plane. As such, within each T-L plane, with the time interval denoted by $[t_s$, $t_e]$, the execution lines of a job on the fluid and LLREF schedulers match at $t_s$ and $t_e$, with the starting point determined by setting the ending point of the fluid scheduler at $(0, t_e)$. When a job is executing, it has a slope of $-1$ on the T-L plane since it reduces the remaining execution time by one per time unit. Likewise, when a job is suspended it has a slope of zero. The line on which the remaining local execution time matches the remaining time in the T-L plane is called the no local laxity diagonal by the authors of LLREF \cite{llref}. A secondary event occurs when a job reaches the no local laxity diagonal or a job runs out of allocated execution time, as when a job reaches these points, it must either execute or suspend for the rest of the interval. This means that the number of secondary events cannot exceed the number of jobs. The LLREF scheduling policy is to schedule jobs with the highest remaining local execution time at each secondary event. The LLREF scheduler is non-work preserving since each job is allocated a portion of its total execution time within each T-L plane. An example of the execution lines within a single T-L plane is shown in figure \ref{fig_llref}.
+
+\subsubsection{U-EDF}
+U-EDF is another optimal multiprocessor scheduler on continuous time for sporadic implicit-deadline task sets \cite{uedf}. It completely loosens the notion of fairness further and schedules based on a generalization of EDF. At each job release event, U-EDF allocates an execution time budget $B_{i,j}$ for each task and core pair, where $B_{i,j}$ represents the remaining time that task $\tau_i$ can run on the $j$th core, and is consumed accordingly. This budget lasts until the next job release event, which we define to be $d$ time units away. There are limitations to how $B_{i,j}$ can be allocated as task $\tau_i$'s released jobs need to run for a total of $dU_i$ units of time by the next job release event, and each core can only execute for $d$ time units. Thus we get the restrictions $\sum_j B_{i,j} \leq d$ and $\sum_i B_{i,j} = dU_i$. U-EDF does this core allocation, denoted as "horizontal allocation" in the original paper \cite{uedf}, by handling each task in order of decreasing EDF priority and increasing $B_{i,j}$ for the lowest core satisfying $\sum_j B_{i,j} \leq d$ until $\sum_i B_{i,j} = dU_i$. Then scheduling for core $j$ is accomplished using the EDF-D algorithm \cite{uedf} by picking the highest EDF priority task $\tau_i$ such that $B_{i,j} > 0$, with $B_{i,j}$ being reduced as task $i$ executes on core $j$. For migration avoidance, the concept of virtual cores is introduced \cite{uedf}, where core $j$ can refer to any dynamically changing permutation of the actual cores. This allows for context switch and migration avoidance to work as described in section 3.4.1. The authors of U-EDF argue that, with this virtual core concept, the number of migrations and context switches is significantly reduced compared to other fair-based optimal schedulers.
+
+\begin{algorithm}
+\caption{Fixed-Utilization Random Task-Set Generator}\label{rtset_alg}
+\begin{algorithmic}
+\State $u \gets$ target utilization
+\State $n \gets$ task count
+\State $R \gets$ random integer generator (inclusive)
+\State $P \gets$ precision value
+\State $T_{min}, T_{max} \gets$ period bounds
+\State $S \gets$ sorted set of integer partitions (initialized as empty)
+\State $\tau \gets$ output task set of size $n$
+\While{$|S| < n$}
+    \State $S.insert(R(1, u \cdot P - 1))$
+    \If{$|S| = n$ and $\exists \; i$ such that $s_{i+1} - s_i > P$}
+        \State $S.clear()$
+    \EndIf
+\EndWhile
+\For{$s_i \in S$ where $1 \leq i \leq n+1$}
+    \State $U \gets s_{i+1} - s_i$
+    \State $T \gets R(T_{min}, T_{max})$
+    \State $C \gets U \cdot T$
+    \State $\tau_i \in \tau \gets$ task with WCET of $C$ and period of $T$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+\begin{figure}
+\begin{tikzpicture}
+\begin{axis}[
+    title={Uniform Fixed-Utilization Task Set Sampling},
+    view={135}{45},
+    xmin=0, xmax=1.5,
+    ymin=0, ymax=1.5,
+    zmin=0, zmax=1.5,
+    xtick distance=0.25,
+    ytick distance=0.25,
+    ztick distance=0.25,
+    xmajorgrids=true,
+    ymajorgrids=true,
+    zmajorgrids=true,
+    xlabel=task 2 utilization,
+    ylabel=task 1 utilization,
+    zlabel=task 3 utilization
+]
+\addplot3[color=gray, fill=gray!20] coordinates 
+{
+    (1,0.5,0)
+    (0.5,1,0)
+    (0,1,0)
+    (0,0.5,0)
+    (0.5,0,0)
+    (1,0,0)
+    (1,0.5,0)
+};
+\addplot3[color=red] coordinates 
+{
+    (1.5,0,0)
+    (0,1.5,0)
+    (0,0,1.5)
+    (1.5,0,0)
+};
+\addplot3[color=red, dashed] coordinates 
+{
+    (1,0.5,0)
+    (0.5,1,0)
+    (0,1,0.5)
+    (0,0.5,1)
+    (0.5,0,1)
+    (1,0,0.5)
+    (1,0.5,0)
+};
+\input{stickbreak.tex}
+\end{axis}
+\end{tikzpicture}
+\caption{1000 random task sets consisting of three tasks with a total utilization of 1.5 generated by the Stick-Breaking Approach with a precision value of 1000. The 1.5 scaled unit simplex and its intersection with the unit cube are shown.}
+\label{fig_stickbreak}
+\end{figure}
+\subsection{Task Set Generation}
+To compare various scheduling algorithms, we must generate task sets to serve as our medium on which comparisons can be made. This can be done by generating $n$ uniformly random tasks with a fixed utilization sum of $u$, where the utilization of a task is denoted as its execution time divided by its period.
+
+\subsubsection{Continuous Simplex Sampling} If we define the utilization of task $i$ as $x_i$ in the $n$-dimensional coordinate point $p = [x_1, x_2, \ldots, x_n] \in \mathbf{R}^n$, this problem can be reduced to sampling a random point on the simplex $S_{n,u}$ defined by the corner points $[u,0,\ldots,0], [0,u,\ldots,0], \ldots, [0,0,\ldots,u]$, which is equivalent to the $n$-dimensional unit simplex scaled by a factor of $u$. An approach for simplex sampling specifically for task-set generation is the UUniFast-Discard algorithm \cite{uunifast} with an improved multi-core variant defined by Stafford's RandFixedSum algorithm \cite{randfixedsum}, which both require uniform sampling on real numbers. This problem is also solved by the Dirichlet process, a method for sampling from a unit simplex \cite{dirichlet}.
+
+\subsubsection{Discrete Simplex Sampling} If we constrain the possible utilizations to a set of uniformly spaced discrete values, we can use the Stick-Breaking Approach to sample points on discrete points within a Dirichlet distribution by picking $n-1$ partition points on the closed interval $[1,u)$ to partition into $n$ sub-intervals, then assigning $x_i$ to the size of the $i$th sub-interval \cite{dirichlet}. The advantage of discretized sampling is it replaces uniform sampling on real numbers with uniform sampling on integer values. This is advantageous for computers since they operate on finite-precision values. The pseudo-code used for generating MARISA's fixed-utilization random task sets using the stick-breaking algorithm is shown in algorithm \ref{rtset_alg}.
+
+\subsubsection{Bounding Task Utilizations} The Stick-Breaking Approach and UUniFast-Discard both share a problem when creating task sets with utilizations greater than one for the multi-core case, as the sample space is modeled as the intersection of an $n$-dimensional unit cube and the simplex described above. This is because individual task utilizations must be limited to at most one. This can be circumvented by discarding invalid task sets, thus allowing simplex sampling to extend to multi-core. However, this issue increases when the target utilization approaches the number of tasks, as there are fewer ways to partition utilization in a way that guarantees each task gets at most a utilization of one. This correlates to a smaller intersection between the simplex and the unit cube. RandFixedSum addresses this issue by breaking the intersection into a set of simplexes and sampling from each proportionally \cite{randfixedsum}. Implementation of RandFixedSum is outside the scope of MARISA currently. A visualization of the intersection described, sampled by MARISA's implementation of the Stick Breaking Approach with three tasks and a precision of 1000, is shown in figure \ref{fig_stickbreak}.
+
+\subsection{Comparison Procedure}
+For this experiment, we will check the schedulability, context switches, and job-level migrations of each algorithm at certain utilization values on random task sets generated as defined above. Similar to the schedulability test used in a paper outlining EDZL schedulability analysis \cite{edzl}, we will compare with core counts of 2, 4, and 8. For a task set to be feasible, the size of the task set must be greater than the core count, since otherwise the average utilization per task must exceed $1$, which produces invalid tasks. In addition, the closer the core count is to the task count, the larger the issue motivating Stafford's RandFixedSum becomes, which is described in section 4.2.3. Therefore, the number of tasks will be fixed at 12 to ensure sufficient feasible task sets for $8$ cores. Periods for tasks will be uniformly sampled between $4$ and $16$. The reasoning behind choosing these period values is covered in section 4.3.1. Utilization steps of $0.005k$ will be used up to utilization $k$, with $50$ trials per utilization, where $k$ is the number of processors. This amounts to $10^4$ trials per experiment. Since PD$^2$ is only optimal on discrete time, we will use a quantum of length $0.1$ and round execution times up. This will keep PD$^2$ comparable in terms of schedulability without overly inflating context switches and migration times. The utilization of these schedules will be based on the original task set utilization, as we consider the rounding-up process to be contained in the PD$^2$ scheduler rather than the task set generation.
+
+\subsection{Schedulability Percentage vs Utilization}
+Schedulability will be checked by simulating up to time $2H$ where $H = \text{LCM}\{\tau_i\}$ for tasks $\tau_i$ in the task set \cite{leung}. Our period choice of $4$ to $16$ guarantees that $H \leq 27720$ which is the lcm of all period choices. The resulting graphs for each core count used are shown in figure \ref{fig_sched}.
+
+\subsection{Comparison of Context Switches}
+We define a context switch as an event where a core switches the job running on it or when a core switches between running and idle. For data collection, using the same task sets generated for schedulability tests, we will also check for the number of context switches up to time $1000$ for each trial. Since for some utilization values, some generated task sets are not schedulable on certain algorithms, we will only count context switches on schedulable task sets. The compared value is the mean number of context switches per schedulable task set at each utilization. The resulting graphs for each core count used are shown in figure \ref{fig_cswitch}.
+
+\subsection{Job-Level Migrations}
+We define a job-level migration as an event where a job that was last executed on one core is scheduled onto a different core. Fresh jobs that have not been previously executed cannot migrate. From this definition, it is clear that migrations must occur during context switches. As such, we should expect the migrations to roughly scale with the number of context switches. Like context switch comparison, we will check the number of migrations up to time $1000$ on the same task sets used for schedulability, counting only schedulable task sets. The compared value is the mean number of migrations per schedulable task set at each utilization. The resulting graphs for each core count used are shown in figure \ref{fig_mig}.
+
+\subsection{Experiment Conclusion}
+\subsubsection{Schedulability} The schedulability of GEDF appears to perform worse as the core count increases and is by far the worst-performing algorithm. Due to the rounding-up procedure, PD$^2$ appears to fall off at roughly $0.1$ utilization regardless of core count. EDZL appears near optimal, with its fall-off point scaling linearly with the core count. And lastly, LLREF and U-EDF are constant lines at the top due to being optimal on continuous time.
+
+\subsubsection{Context Switches} GEDF and EDZL behave almost identically due to EDZL using primarily GEDF. The number of context switches with PD$^2$ scales almost perfectly linearly, with very little deviation. This is likely due to separating each task into subtasks with execution times equivalent to the quantum size. With $y_i$ denoting the context switch count of task $i$ and $C_i, T_i, U_i$ denoting the execution time, period, and utilization of task $i$ respectively, this means $y_i \approx \frac{C_i}{q}$ and so $\frac{y_i}{T_i} = \frac{C_i}{qT_i} = qU_i$ where $q = 0.1$ denotes the quantum length. Thus the total context switch count $y = \frac{tU}{q} = 10^4U$ where $U$ is the task set utilization and $t = 1000$ is the simulated time. This equation matches the resulting data and explains the consistency of the line. This also implies the effects of early releasing on the context switch count are not very significant, as this is not accounted for in the above equation. U-EDF behaves strangely, likely due to its way of partitioning onto cores. It only schedules onto enough cores to satisfy the task-set utilization, which explains the constant context-switch count at $\leq1$ utilization, as it is simply doing uniprocessor EDF. The jumps might be better explained by the migrations. As the authors of U-EDF suggested \cite{uedf}, it has generally lower context switches than the other optimal schedulers, scaling linearly over time and without the spike at the end that LLREF has.
+
+\subsubsection{Job-Level Migrations} The proportion of context switches that are job-level migrations appears to behave roughly the same regardless of the scheduling algorithm, as in at near zero utilization, roughly 5\% of context switches, with the proportion increasing exponentially near full utilization. This tailing exponential scaling for EDF and EDZL is more distinguishable with 8 cores. For U-EDF, since it only uses enough cores to satisfy the task-set utilization, the migrations start at zero for task sets schedulable by uniprocessor and spike at each subsequent whole utilization as a core reaches full capacity, before overflowing to the next core. The original paper covering U-EDF \cite{uedf} does not do this specific type of utilization vs migration comparison, so it is not conclusive if this is a flawed implementation issue or inherent to the algorithm. However, this is likely due to U-EDF only scheduling to minimal cores, which causes high contention over the available cores just below whole utilization values. U-EDF has comparable migration counts to PD$^2$.
+
+\begin{figure}
+\scalebox{.95}{
+\input{2core_sched}
+}\hspace{1px}
+\scalebox{.95}{
+\input{4core_sched}
+}\hspace{1px}
+\scalebox{.95}{
+\input{8core_sched}
+}
+\caption{Schedulability experimental results.}
+\label{fig_sched}
+\end{figure}
+
+\begin{figure}
+\scalebox{.95}{
+\input{2core_cswitch}
+}\hspace{1px}
+\scalebox{.95}{
+\input{4core_cswitch}
+}\hspace{1px}
+\scalebox{.95}{
+\input{8core_cswitch}
+}
+\caption{Context Switches vs Utilization experimental results.}
+\label{fig_cswitch}
+\end{figure}
+
+\begin{figure}
+\scalebox{.95}{
+\input{2core_mig}
+}\hspace{1px}
+\scalebox{.95}{
+\input{4core_mig}
+}\hspace{1px}
+\scalebox{.95}{
+\input{8core_mig}
+}
+\caption{Job-Level Migrations vs Utilization experimental results.}
+\label{fig_mig}
+\end{figure}
+
+% An example of a floating figure using the graphicx package.
+% Note that \label must occur AFTER (or within) \caption.
+% For figures, \caption should occur after the \includegraphics.
+% Note that IEEEtran v1.7 and later has special internal code that
+% is designed to preserve the operation of \label within \caption
+% even when the captionsoff option is in effect. However, because
+% of issues like this, it may be the safest practice to put all your
+% \label just after \caption rather than within \caption{}.
+%
+% Reminder: the "draftcls" or "draftclsnofoot", not "draft", class
+% option should be used if it is desired that the figures are to be
+% displayed while in draft mode.
+%
+%\begin{figure}[!t]
+%\centering
+%\includegraphics[width=2.5in]{myfigure}
+% where an .eps filename suffix will be assumed under latex, 
+% and a .pdf suffix will be assumed for pdflatex; or what has been declared
+% via \DeclareGraphicsExtensions.
+%\caption{Simulation results for the network.}
+%\label{fig_sim}
+%\end{figure}
+
+% Note that the IEEE typically puts floats only at the top, even when this
+% results in a large percentage of a column being occupied by floats.
+
+
+% An example of a double column floating figure using two subfigures.
+% (The subfig.sty package must be loaded for this to work.)
+% The subfigure \label commands are set within each subfloat command,
+% and the \label for the overall figure must come after \caption.
+% \hfil is used as a separator to get equal spacing.
+% Watch out that the combined width of all the subfigures on a 
+% line do not exceed the text width or a line break will occur.
+%
+%\begin{figure*}[!t]
+%\centering
+%\subfloat[Case I]{\includegraphics[width=2.5in]{box}%
+%\label{fig_first_case}}
+%\hfil
+%\subfloat[Case II]{\includegraphics[width=2.5in]{box}%
+%\label{fig_second_case}}
+%\caption{Simulation results for the network.}
+%\label{fig_sim}
+%\end{figure*}
+%
+% Note that often IEEE papers with subfigures do not employ subfigure
+% captions (using the optional argument to \subfloat[]), but instead will
+% reference/describe all of them (a), (b), etc., within the main caption.
+% Be aware that for subfig.sty to generate the (a), (b), etc., subfigure
+% labels, the optional argument to \subfloat must be present. If a
+% subcaption is not desired, just leave its contents blank,
+% e.g., \subfloat[].
+
+
+% An example of a floating table. Note that, for IEEE style tables, the
+% \caption command should come BEFORE the table and, given that table
+% captions serve much like titles, are usually capitalized except for words
+% such as a, an, and, as, at, but, by, for, in, nor, of, on, or, the, to
+% and up, which are usually not capitalized unless they are the first or
+% last word of the caption. Table text will default to \footnotesize as
+% the IEEE normally uses this smaller font for tables.
+% The \label must come after \caption as always.
+%
+%\begin{table}[!t]
+%% increase table row spacing, adjust to taste
+%\renewcommand{\arraystretch}{1.3}
+% if using array.sty, it might be a good idea to tweak the value of
+% \extrarowheight as needed to properly center the text within the cells
+%\caption{An Example of a Table}
+%\label{table_example}
+%\centering
+%% Some packages, such as MDW tools, offer better commands for making tables
+%% than the plain LaTeX2e tabular which is used here.
+%\begin{tabular}{|c||c|}
+%\hline
+%One & Two\\
+%\hline
+%Three & Four\\
+%\hline
+%\end{tabular}
+%\end{table}
+
+
+% Note that the IEEE does not put floats in the very first column
+% - or typically anywhere on the first page for that matter. Also,
+% in-text middle ("here") positioning is typically not used, but it
+% is allowed and encouraged for Computer Society conferences (but
+% not Computer Society journals). Most IEEE journals/conferences use
+% top floats exclusively. 
+% Note that, LaTeX2e, unlike IEEE journals/conferences, places
+% footnotes above bottom floats. This can be corrected via the
+% \fnbelowfloat command of the stfloats package.
+
+
+
+
+\section{Conclusion}
+In this paper, we have showcased the features of MARISA as a simulator and visualizer for real-time multiprocessor scheduling, how it compares to other similar tools, and how it can be applied to scheduling algorithm comparisons. While MARISA is still very much a prototype, it showcases the design details and functionality considered for real-time simulation tools, as well as some unique features of MARISA that potentially set it apart from existing tools. With further development, MARISA can support more features shown in other similar tools such as resource access control and synchronization protocols, more scheduling algorithms, better visualizations, more simulation parameters, and live configuration through a user interface.
+
+% conference papers do not normally have an appendix
+
+
+
+% use section* for acknowledgment
+%\ifCLASSOPTIONcompsoc
+  % The Computer Society usually uses the plural form
+  %\section*{Acknowledgments}
+%\else
+  % regular IEEE prefers the singular form
+  %\section*{Acknowledgment}
+%\fi
+
+
+%The authors would like to thank...
+
+
+
+
+
+% trigger a \newpage just before the given reference
+% number - used to balance the columns on the last page
+% adjust value as needed - may need to be readjusted if
+% the document is modified later
+%\IEEEtriggeratref{8}
+% The "triggered" command can be changed if desired:
+%\IEEEtriggercmd{\enlargethispage{-5in}}
+
+% references section
+
+% can use a bibliography generated by BibTeX as a .bbl file
+% BibTeX documentation can be easily obtained at:
+% http://mirror.ctan.org/biblio/bibtex/contrib/doc/
+% The IEEEtran BibTeX style support page is at:
+% http://www.michaelshell.org/tex/ieeetran/bibtex/
+%\bibliographystyle{IEEEtran}
+% argument is your BibTeX string definitions and bibliography database(s)
+%\bibliography{IEEEabrv,../bib/paper}
+%
+% <OR> manually copy in the resultant .bbl file
+% set second argument of \begin to the number of references
+% (used to reserve space for the reference number labels box)
+\newpage
+\begin{thebibliography}{1}
+\bibitem{cheddar_paper}
+F. Singhoff, J. Legrand, L. Nana, and L. Marcé. 2004. Cheddar: a flexible real time scheduling framework. Ada Lett. XXIV, 4 (December 2004), 1–8. https://doi.org/10.1145/1046191.1032298
+\bibitem{cheddar_docs}
+F. Singhoff, J. Legrand, L. Nana, and L. Marcé. 2004. Cheddar, Project Website,
+http://beru.univ-brest.fr/cheddar/
+\bibitem{cheddar_repo}
+F. Singhoff, J. Legrand, L. Nana, and L. Marcé. 2004. Cheddar, Source Code,
+http://beru.univ-brest.fr/svn/CHEDDAR/
+\bibitem{yartiss_paper}
+Younès Chandarli, Frédéric Fauberteau, Damien Masson, Serge Midonnet, Manar Qamhieh. YARTISS: A Tool to Visualize, Test, Compare and Evaluate Real-Time Scheduling Algorithms. WATERS 2012, Jul 2012, Italy. pp.21--26.
+\bibitem{yartiss_docs}
+Younès Chandarli, Frédéric Fauberteau, Damien Masson, Serge Midonnet, Manar Qamhieh. YARTISS, Documentation Website, https://igm.univ-mlv.fr/rtalgo/Softwares/YARTISS/doc/
+\bibitem{mcrtsim_paper}
+J. Wu and Y. -C. Huang, "MCRTsim: A simulation tool for multi-core real-time systems," \emph{2017 International Conference on Applied System Innovation (ICASI)}, Sapporo, Japan, 2017, pp. 461-464, doi: 10.1109/ICASI.2017.7988454.
+\bibitem{mcrtsim_repo}
+J. Wu and Y. -C. Huang, MCRTsim, GitHub, https://github.com/RESL-NPTU/MCRTsim/tree/master
+\bibitem{simso_paper}
+Maxime Chéramy, Pierre-Emmanuel Hladik, Anne-Marie Déplanche. SimSo: A Simulation Tool to Evaluate Real-Time Multiprocessor Scheduling Algorithms. 5th International Workshop on Analysis Tools and Methodologies for Embedded and Real-time Systems (WATERS), Jul 2014, Madrid, Spain. 6 p. ⟨hal-01052651⟩
+\bibitem{simso_repo}
+Maxime Chéramy, Pierre-Emmanuel Hladik, Anne-Marie Déplanche. SimSo, GitHub, https://github.com/MaximeCheramy/simso
+\bibitem{ertsim}
+Pillai, Anju \& Isha, T.B.. (2013). ERTSim: An embedded real-time task simulator for scheduling. \emph{2013 IEEE International Conference on Computational Intelligence and Computing Research}, IEEE ICCIC 2013. 1-4. 10.1109/ICCIC.2013.6724195. 
+\bibitem{edzl}
+J. Lee and I. Shin, "EDZL Schedulability Analysis in Real-Time Multicore Scheduling," in \emph{IEEE Transactions on Software Engineering}, vol. 39, no. 7, pp. 910-916, July 2013, doi: 10.1109/TSE.2012.75.
+\bibitem{llref}
+H. Cho, B. Ravindran and E. D. Jensen, "An Optimal Real-Time Scheduling Algorithm for Multiprocessors," \emph{2006 27th IEEE International Real-Time Systems Symposium (RTSS'06)}, Rio de Janeiro, Brazil, 2006, pp. 101-110, doi: 10.1109/RTSS.2006.10.
+\bibitem{pd2}
+Anand Srinivasan and James H. Anderson. 2002. "Optimal rate-based scheduling on multiprocessors", in \emph{Proceedings of the thirty-fourth annual ACM symposium on Theory of computing (STOC '02)}, Association for Computing Machinery, New York, NY, USA, pp. 189–198, https://doi.org/10.1145/509907.509938.
+\bibitem{run}
+P. Regnier, G. Lima, E. Massa, G. Levin and S. Brandt, "RUN: Optimal Multiprocessor Real-Time Scheduling via Reduction to Uniprocessor", 2011 IEEE 32nd Real-Time Systems Symposium, Vienna, Austria, 2011, pp. 104-115, doi: 10.1109/RTSS.2011.17.
+\bibitem{uunifast}
+Bini, E., Buttazzo, G.C. Measuring the Performance of Schedulability Tests. Real-Time Syst 30, 129–154 (2005). https://doi.org/10.1007/s11241-005-0507-9
+\bibitem{randfixedsum}
+Emberson, P. \& Stafford, R. \& Davis, R.I.. (2010). Techniques For The Synthesis Of Multiprocessor Tasksets. WATERS'10.
+\bibitem{dirichlet}
+Frigyik, Andrew Béla, Amol Kapila and Maya R. Gupta, “Introduction to the Dirichlet Distribution and Related Processes.” (2010).
+\bibitem{uedf}
+G. Nelissen, V. Berten, V. Nélis, J. Goossens and D. Milojevic, "U-EDF: An Unfair But Optimal Multiprocessor Scheduling Algorithm for Sporadic Tasks," \emph{2012 24th Euromicro Conference on Real-Time Systems}, Pisa, Italy, 2012, pp. 13-23, doi: 10.1109/ECRTS.2012.36.
+\bibitem{leung}
+Joseph Y.-T. Leung, M.L. Merrill, A note on preemptive scheduling of periodic, real-time tasks, Information Processing Letters, Volume 11, Issue 3, 1980, Pages 115-118, ISSN 0020-0190, https://doi.org/10.1016/0020-0190(80)90123-4.
+\end{thebibliography}
+
+
+
+
+% that's all folks
+\end{document}
+
+
